@@ -25,14 +25,16 @@ describe("ticketsApi", () => {
       },
     ];
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => mockTickets,
+    const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockTickets,
     } as Response);
+
+    vi.stubGlobal("fetch", fetchMock);
 
     const result = await getTickets();
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:5000/tickets");
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:5000/tickets");
     expect(result).toEqual(mockTickets);
   });
 });
