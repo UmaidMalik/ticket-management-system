@@ -33,8 +33,12 @@ jobs:
         env:
           VITE_API_BASE_URL: http://localhost:5000
 
+      - name: Confirm dist folder exists
+        run: ls -la dist
+
       - name: Upload production build artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
           path: incident-management-frontend/dist
+          if-no-files-found: error
