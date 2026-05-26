@@ -12,7 +12,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: frontend/incident-management-frontend
+        working-directory: incident-management-frontend
 
     steps:
       - name: Checkout repository
