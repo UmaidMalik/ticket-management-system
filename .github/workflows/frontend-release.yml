@@ -1,0 +1,41 @@
+name: Frontend Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release-frontend:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: incident-management-frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: incident-management-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: http://localhost:5000
+
+      - name: Zip frontend build
+        run: zip -r frontend-dist.zip dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: incident-management-frontend/frontend-dist.zip
