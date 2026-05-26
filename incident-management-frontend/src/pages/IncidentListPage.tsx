@@ -63,11 +63,7 @@ export default function IncidentListPage() {
           getUsers(),
         ]);
 
-        const sortedTickets = [...ticketData].sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() -
-            new Date(a.created_at).getTime()
-        );
+        const sortedTickets = [...ticketData].sort((a, b) => a.id - b.id);
 
         setTickets(sortedTickets);
         setUsers(userData);
@@ -142,7 +138,7 @@ export default function IncidentListPage() {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               className="pl-9"
-              placeholder="Search by title, description, or ID..."
+              placeholder="Search by ID, title, description, or assignee"
             />
           </div>
 

@@ -8,15 +8,18 @@ export interface User {
 }
 
 export interface Ticket {
-    id: number;
-    title: string;
-    description: string;
-    category: TicketCategory;
-    impact: TicketLevel;
-    priority: TicketLevel;
-    status: TicketStatus;
-    incident_reporter_id: number;
-    assigned_to_id: number | null;
-    created_at: string;
-    resolved_at: string | null;
+  id: number;
+  title: string;
+  description: string;
+  category: TicketCategory;
+  impact: TicketLevel;
+  priority: TicketLevel;
+  status: TicketStatus;
+  incident_reporter_id: number;
+  assigned_to_id: number | null;
+  created_at: string;
+  resolved_at: string | null;
+
+  assignee_name?: string | null;
+  reporter_name?: string | null;
 }

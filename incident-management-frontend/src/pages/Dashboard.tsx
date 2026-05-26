@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import {
   AlertCircle,
@@ -13,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -28,9 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { mockTickets } from "@/data/mockTickets";
-import { mockUsers } from "@/data/mockUsers";
-import { getUserNameById } from "@/lib/users";
+import { getTickets } from "@/api/ticketsApi";
 import type { Ticket, TicketLevel, TicketStatus } from "@/types";
 
 function getStatusBadgeVariant(status: TicketStatus) {
@@ -69,12 +67,16 @@ function StatCard({
   return (
     <Card>
       <CardHeader>
-        <CardDescription>{title}</CardDescription>
-        <CardTitle className="text-3xl font-semibold">{value}</CardTitle>
-        <CardAction>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <CardDescription>{title}</CardDescription>
+            <CardTitle className="text-3xl font-semibold">{value}</CardTitle>
+          </div>
+
           <Icon className="h-5 w-5 text-muted-foreground" />
-        </CardAction>
+        </div>
       </CardHeader>
+
       <CardContent>
         <p className="text-sm text-muted-foreground">{description}</p>
       </CardContent>
@@ -83,7 +85,34 @@ function StatCard({
 }
 
 export default function Dashboard() {
-  const tickets: Ticket[] = mockTickets;
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function loadTickets() {
+      try {
+        const data = await getTickets();
+        setTickets(data);
+      } catch (error) {
+        console.error(error);
+        setError("Could not load dashboard data.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadTickets();
+  }, []);
+
+  if (isLoading) {
+    return <main className="p-6">Loading dashboard...</main>;
+  }
+
+  if (error) {
+    return <main className="p-6 text-red-500">{error}</main>;
+  }
 
   const totalTickets = tickets.length;
   const openTickets = tickets.filter((t) => t.status === "Open").length;
@@ -120,15 +149,15 @@ export default function Dashboard() {
             </p>
           </div>
 
-            <div className="flex gap-2">
+          <div className="flex gap-2">
             <Button asChild variant="outline">
-                <Link to="/incidents">View Incidents</Link>
+              <Link to="/incidents">View Incidents</Link>
             </Button>
 
             <Button asChild>
-                <Link to="/incidents/new">Create Incident</Link>
+              <Link to="/incidents/new">Create Incident</Link>
             </Button>
-            </div>
+          </div>
         </section>
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -188,7 +217,11 @@ export default function Dashboard() {
                 <TableBody>
                   {recentTickets.map((ticket) => (
                     <TableRow key={ticket.id}>
-                      <TableCell>
+                      <TableCell
+                        key={ticket.id}
+                        onClick={() => navigate(`/incidents/${ticket.id}/edit`)}
+                        className="cursor-pointer transition-colors hover:bg-muted/50"
+                      >
                         <div className="font-medium">{ticket.title}</div>
                         <div className="text-sm text-muted-foreground">
                           {ticket.category} · Impact: {ticket.impact}
@@ -210,7 +243,7 @@ export default function Dashboard() {
                       </TableCell>
 
                       <TableCell>
-                        {getUserNameById(mockUsers, ticket.assigned_to_id)}
+                        {ticket.assignee_name ?? "Unassigned"}
                       </TableCell>
 
                       <TableCell>{formatDate(ticket.created_at)}</TableCell>
@@ -237,6 +270,7 @@ export default function Dashboard() {
                     Completed incidents
                   </p>
                 </div>
+
                 <div className="flex items-center gap-2 text-2xl font-semibold">
                   <CheckCircle2 className="h-5 w-5" />
                   {resolvedTickets}

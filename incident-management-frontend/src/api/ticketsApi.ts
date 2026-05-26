@@ -1,5 +1,6 @@
-import { mockTickets } from "@/data/mockTickets";
 import type { Ticket } from "@/types";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export type CreateTicketRequest = Omit<
   Ticket,
@@ -10,56 +11,75 @@ export type UpdateTicketRequest = Partial<
   Omit<Ticket, "id" | "created_at" | "resolved_at">
 >;
 
-let tickets = [...mockTickets];
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    let message = "Request failed";
 
-export async function getTickets(): Promise<Ticket[]> {
-  return tickets;
+    try {
+      const errorBody = await response.json();
+      message = errorBody.error || errorBody.message || message;
+    } catch {
+      
+    }
+
+    throw new Error(message);
+  }
+
+  return response.json();
 }
 
-export async function getTicketById(id: number): Promise<Ticket | undefined> {
-  return tickets.find((ticket) => ticket.id === id);
+export async function getTickets(): Promise<Ticket[]> {
+  const response = await fetch(`${API_BASE_URL}/tickets`);
+  return handleResponse<Ticket[]>(response);
+}
+
+export async function getTicketById(id: number): Promise<Ticket> {
+  const response = await fetch(`${API_BASE_URL}/tickets/${id}`);
+  return handleResponse<Ticket>(response);
 }
 
 export async function createTicket(data: CreateTicketRequest): Promise<Ticket> {
-  const newTicket: Ticket = {
-    id: Math.max(...tickets.map((ticket) => ticket.id), 0) + 1,
-    ...data,
-    created_at: new Date().toISOString(),
-    resolved_at:
-      data.status === "Resolved" || data.status === "Closed"
-        ? new Date().toISOString()
-        : null,
-  };
+  const response = await fetch(`${API_BASE_URL}/tickets`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
-  tickets = [newTicket, ...tickets];
-
-  return newTicket;
+  return handleResponse<Ticket>(response);
 }
 
 export async function updateTicket(
   id: number,
   data: UpdateTicketRequest
-): Promise<Ticket | undefined> {
-  const existingTicket = tickets.find((ticket) => ticket.id === id);
+): Promise<Ticket> {
+  const response = await fetch(`${API_BASE_URL}/tickets/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
-  if (!existingTicket) {
-    return undefined;
+  return handleResponse<Ticket>(response);
+}
+
+export async function deleteTicket(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/tickets/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    let message = "Failed to delete ticket";
+
+    try {
+      const errorBody = await response.json();
+      message = errorBody.error || errorBody.message || message;
+    } catch {
+
+    }
+
+    throw new Error(message);
   }
-
-  const updatedTicket: Ticket = {
-    ...existingTicket,
-    ...data,
-    resolved_at:
-      data.status === "Resolved" || data.status === "Closed"
-        ? existingTicket.resolved_at ?? new Date().toISOString()
-        : data.status === "Open" || data.status === "In Progress"
-          ? null
-          : existingTicket.resolved_at,
-  };
-
-  tickets = tickets.map((ticket) =>
-    ticket.id === id ? updatedTicket : ticket
-  );
-
-  return updatedTicket;
 }

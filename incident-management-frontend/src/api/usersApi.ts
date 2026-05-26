@@ -1,11 +1,3 @@
-import { mockUsers } from "@/data/mockUsers";
-import type { User } from "@/types";
-
-export async function getUsers(): Promise<User[]> {
-  return mockUsers;
-}
-
-/*
 import type { User } from "@/types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -18,5 +10,13 @@ export async function getUsers(): Promise<User[]> {
   }
 
   return response.json();
+}
+
+/*
+import { mockUsers } from "@/data/mockUsers";
+import type { User } from "@/types";
+
+export async function getUsers(): Promise<User[]> {
+  return mockUsers;
 }
 */

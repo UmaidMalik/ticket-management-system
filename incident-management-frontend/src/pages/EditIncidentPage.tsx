@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getTicketById, updateTicket } from "@/api/ticketsApi";
+import { getTicketById, updateTicket, deleteTicket } from "@/api/ticketsApi";
 import type { Ticket } from "@/types";
 import { mockUsers } from "@/data/mockUsers";
 
@@ -54,6 +54,24 @@ export default function EditIncidentPage() {
     });
 
     navigate("/incidents");
+  }
+
+  async function handleDelete() {
+    if (!ticket) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete incident #${ticket.id}? This cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteTicket(ticket.id);
+      navigate("/incidents");
+    } catch (error) {
+      console.error(error);
+      alert("Could not delete incident.");
+    }
   }
 
   if (isLoading) {
@@ -221,12 +239,22 @@ export default function EditIncidentPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
-                <Button asChild variant="outline">
-                  <Link to="/incidents">Cancel</Link>
+              <div className="flex justify-between gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                >
+                  Delete Incident
                 </Button>
 
-                <Button type="submit">Save Changes</Button>
+                <div className="flex gap-3">
+                  <Button asChild variant="outline">
+                    <Link to="/incidents">Cancel</Link>
+                  </Button>
+
+                  <Button type="submit">Save Changes</Button>
+                </div>
               </div>
             </form>
           </CardContent>
