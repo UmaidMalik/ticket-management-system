@@ -13,7 +13,7 @@ services:
       - app-network
 
   backend:
-    build: ./incident-management-backend/ticketing-api
+    build: ./ticketing-api
     environment:
       MYSQL_HOST: mysql
       MYSQL_USER: ticket_user
