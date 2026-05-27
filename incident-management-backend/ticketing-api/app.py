@@ -21,12 +21,11 @@ REQUEST_LATENCY = Histogram(
     ["method", "endpoint"]
 )
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'ticket_user'
-app.config['MYSQL_PASSWORD'] = 'ticket_password'
-app.config['MYSQL_DB'] = 'ticketing_system'
-app.config['MYSQL_PORT'] = 3307
-
+app.config["MYSQL_HOST"] = os.getenv("MYSQL_HOST", "localhost")
+app.config["MYSQL_USER"] = os.getenv("MYSQL_USER", "ticket_user")
+app.config["MYSQL_PASSWORD"] = os.getenv("MYSQL_PASSWORD", "ticket_password")
+app.config["MYSQL_DB"] = os.getenv("MYSQL_DB", "ticketing_system")
+app.config["MYSQL_PORT"] = int(os.getenv("MYSQL_PORT", "3306"))
 
 @app.before_request
 def before_request():
