@@ -99,6 +99,11 @@ resource "aws_instance" "backend" {
   key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.backend_sg.id]
 
+  root_block_device {
+    volume_size = 16
+    volume_type = "gp3"
+  }
+
   user_data = <<-EOF
 #!/bin/bash
 set -xe
