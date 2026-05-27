@@ -71,5 +71,9 @@ app.register_blueprint(tickets_bp)
 def metrics():
     return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
 
+@app.route("/test-error")
+def test_error():
+    raise Exception("Intentional test error for Grafana alert demo")
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5000)
