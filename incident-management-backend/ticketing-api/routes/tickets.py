@@ -3,6 +3,11 @@ from . import tickets_bp
 from db import get_db
 from datetime import datetime
 
+VALID_CATEGORIES = {'Network', 'Hardware', 'Software', 'Security'}
+VALID_IMPACTS = {'Low', 'Medium', 'High', 'Critical'}
+VALID_PRIORITIES = {'Low', 'Medium', 'High', 'Critical'}
+VALID_STATUSES = {'Open', 'In Progress', 'Resolved', 'Closed'}
+
 @tickets_bp.route('/tickets', methods=['GET'])
 def get_tickets():
     db = get_db()
@@ -62,6 +67,15 @@ def create_ticket():
     if not data or not all(k in data for k in ['title', 'description', 'category', 'impact', 'priority', 'incident_reporter_id']):
         return jsonify({'error': 'Missing required fields'}), 400
 
+    if data['category'] not in VALID_CATEGORIES:
+        return jsonify({'error': f"Invalid category. Allowed: {', '.join(VALID_CATEGORIES)}"}), 400
+    if data['impact'] not in VALID_IMPACTS:
+        return jsonify({'error': f"Invalid impact. Allowed: {', '.join(VALID_IMPACTS)}"}), 400
+    if data['priority'] not in VALID_PRIORITIES:
+        return jsonify({'error': f"Invalid priority. Allowed: {', '.join(VALID_PRIORITIES)}"}), 400
+    if data.get('status', 'Open') not in VALID_STATUSES:
+        return jsonify({'error': f"Invalid status. Allowed: {', '.join(VALID_STATUSES)}"}), 400
+
     db = get_db()
     cursor = db.cursor()
 
@@ -88,6 +102,19 @@ def create_ticket():
 @tickets_bp.route('/tickets/<int:ticket_id>', methods=['PUT'])
 def update_ticket(ticket_id):
     data = request.json
+    
+    if not data or not all(k in data for k in ['title', 'description', 'category', 'impact', 'priority', 'status', 'incident_reporter_id']):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    if data['category'] not in VALID_CATEGORIES:
+        return jsonify({'error': f"Invalid category. Allowed: {', '.join(VALID_CATEGORIES)}"}), 400
+    if data['impact'] not in VALID_IMPACTS:
+        return jsonify({'error': f"Invalid impact. Allowed: {', '.join(VALID_IMPACTS)}"}), 400
+    if data['priority'] not in VALID_PRIORITIES:
+        return jsonify({'error': f"Invalid priority. Allowed: {', '.join(VALID_PRIORITIES)}"}), 400
+    if data['status'] not in VALID_STATUSES:
+        return jsonify({'error': f"Invalid status. Allowed: {', '.join(VALID_STATUSES)}"}), 400
+
     db = get_db()
     cursor = db.cursor()
 

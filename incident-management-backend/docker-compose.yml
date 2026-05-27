@@ -1,6 +1,8 @@
 services:
   mysql:
     image: mysql:8.0
+    ports:
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: ticketing_system
@@ -13,7 +15,7 @@ services:
       - app-network
 
   backend:
-    build: ./backend/mthree-project/ticketing-api
+    build: ./ticketing-api
     environment:
       MYSQL_HOST: mysql
       MYSQL_USER: ticket_user
