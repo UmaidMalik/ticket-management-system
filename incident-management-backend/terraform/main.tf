@@ -190,6 +190,13 @@ resource "aws_cloudfront_distribution" "frontend_cdn" {
     domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
     origin_id                = "s3-frontend-origin"
     origin_access_control_id = aws_cloudfront_origin_access_control.frontend_oac.id
+
+    custom_origin_config {
+      http_port              = 5000
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
   }
 
   default_cache_behavior {
@@ -208,6 +215,43 @@ resource "aws_cloudfront_distribution" "frontend_cdn" {
         forward = "none"
       }
     }
+  }
+
+  ordered_cache_behavior {
+    path_pattern           = "/tickets*"
+    target_origin_id       = "backend-api-origin"
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods  = ["GET", "HEAD"]
+
+    cache_policy_id = data.aws_cloudfront_cache_policy.caching_disabled.id
+  }
+
+  ordered_cache_behavior {
+    path_pattern           = "/users*"
+    target_origin_id       = "backend-api-origin"
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods  = ["GET", "HEAD"]
+
+    cache_policy_id = data.aws_cloudfront_cache_policy.caching_disabled.id
+  }
+
+  ordered_cache_behavior {
+    path_pattern           = "/metrics*"
+    target_origin_id       = "backend-api-origin"
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods  = ["GET", "HEAD"]
+
+    cache_policy_id = data.aws_cloudfront_cache_policy.caching_disabled.id
+  }
+
+  data "aws_cloudfront_cache_policy" "caching_disabled" {
+    name = "Managed-CachingDisabled"
   }
 
   # React Router support:
