@@ -75,5 +75,9 @@ def metrics():
 def test_error():
     raise Exception("Intentional test error for Grafana alert demo")
 
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5000)

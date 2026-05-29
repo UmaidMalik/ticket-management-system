@@ -32,7 +32,17 @@ jobs:
             echo "Current containers:"
             docker compose ps
 
-            echo "Backend health check:"
-            curl -f http://localhost:5000/tickets > /dev/null
+            echo "Waiting for backend to become healthy..."
+            for i in {1..30}; do
+              if curl -fsS http://localhost:5000/tickets > /dev/null; then
+                echo "Backend is healthy."
+                exit 0
+              fi
 
-            echo "Backend deployment completed successfully."
+              echo "Backend not ready yet. Retrying in 3 seconds..."
+              sleep 3
+            done
+
+            echo "Backend health check failed."
+            docker compose logs backend --tail=100
+            exit 1
