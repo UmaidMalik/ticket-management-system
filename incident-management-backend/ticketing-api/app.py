@@ -4,9 +4,11 @@ from flask_cors import CORS
 from db import get_db, close_db
 from routes import users_bp, tickets_bp
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from routes.auth import auth_bp
 import time
 
 app = Flask(__name__)
+app.config["JWT_SECRET"] = os.getenv("JWT_SECRET", "dev-secret-change-me")
 CORS(app)
 
 REQUEST_COUNT = Counter(
@@ -64,6 +66,7 @@ def after_request(response):
 
     return response
 
+app.register_blueprint(auth_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(tickets_bp)
 

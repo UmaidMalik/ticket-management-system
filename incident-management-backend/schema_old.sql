@@ -11,10 +11,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(80) NOT NULL
-  email VARCHAR(120) NOT NULL UNIQUE,
-  password_hash VARCHAR(255) NOT NULL,
-  role VARCHAR(30) NOT NULL DEFAULT 'editor',
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE tickets (
@@ -36,18 +32,18 @@ CREATE TABLE tickets (
 );
 
 INSERT INTO users (id, name) VALUES
-(1, 'Umaid Malik', 'umaid.malik@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'admin'),
-(2, 'Syeda Wasiq', 'syeda.wasiq@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'admin'),
-(3, 'Karim Hozaien', 'karim.hozaien@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'admin'),
-(4, 'David Hunnicutt', 'david.hunnicutt@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'admin'),
-(5, 'Aisha', 'aisha@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'editor'),
-(6, 'Omar', 'omar@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'editor'),
-(7, 'Fatima', 'fatima@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'editor'),
-(8, 'Daniel', 'daniel@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'viewer'),
-(9, 'Mariam', 'mariam@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'editor'),
-(10, 'Jason', 'jason@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'viewer'),
-(11, 'Nadia', 'nadia@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'editor'),
-(12, 'Ahmed', 'ahmed@mthree.com', 'pbkdf2:sha256:600000$demo-salt-2026$ccf52a980b215813ff3d63a3aff9a7710900c77d78c36f6e1392933cf7177ed9', 'editor');
+(1, 'Umaid'),
+(2, 'Syeda'),
+(3, 'Karim'),
+(4, 'David'),
+(5, 'Aisha'),
+(6, 'Omar'),
+(7, 'Fatima'),
+(8, 'Daniel'),
+(9, 'Mariam'),
+(10, 'Jason'),
+(11, 'Nadia'),
+(12, 'Ahmed');
 
 INSERT INTO tickets (
   id,
