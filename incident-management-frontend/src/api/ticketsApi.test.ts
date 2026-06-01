@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getTickets } from "@/api/ticketsApi";
+import { headers } from "happy-dom/lib/PropertySymbol";
 
 describe("ticketsApi", () => {
   beforeEach(() => {
@@ -34,7 +35,14 @@ describe("ticketsApi", () => {
 
     const result = await getTickets();
 
-    expect(fetchMock).toHaveBeenCalledWith("http://localhost:5000/tickets");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:5000/tickets",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+        }),
+      })
+    );
     expect(result).toEqual(mockTickets);
   });
 });
