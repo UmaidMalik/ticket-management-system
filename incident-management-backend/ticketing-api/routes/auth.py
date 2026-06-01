@@ -38,18 +38,13 @@ def register():
     name = data.get("name", "").strip()
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
-    role = data.get("role", "editor").strip().lower()
-
-    allowed_roles = {"admin", "editor", "viewer"}
+    role = "viewer"
 
     if not name or not email or not password:
         return jsonify({"error": "Name, email, and password are required"}), 400
 
     if len(password) < 8:
         return jsonify({"error": "Password must be at least 8 characters"}), 400
-    
-    if role not in allowed_roles:
-        return jsonify({"error": "Invalid role"}), 400
 
     password_hash = generate_password_hash(password)
 
