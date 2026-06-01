@@ -23,7 +23,6 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<Role>("editor");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,7 +37,6 @@ export default function RegisterPage() {
         name,
         email,
         password,
-        role,
       });
 
       saveAuth(response.token, response.user);
@@ -107,19 +105,9 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <select
-                id="role"
-                value={role}
-                onChange={(event) => setRole(event.target.value as Role)}
-                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                <option value="admin">Admin</option>
-                <option value="editor">Editor</option>
-                <option value="viewer">Viewer</option>
-              </select>
-            </div>
+            <p className="text-xs text-muted-foreground">
+            New accounts are created as viewers. An administrator can update permissions later.
+            </p>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Creating account..." : "Create account"}

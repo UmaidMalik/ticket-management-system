@@ -156,11 +156,13 @@ export default function Dashboard() {
             </p>
 
               <div className="flex items-center gap-2">
+              <Link to="/account">
               {currentUser && (
                 <span className="text-sm text-muted-foreground">
                   {currentUser.name} ({currentUser.role})
                 </span>
               )}
+              </Link>
 
               <Button variant="outline" onClick={handleLogout}>
                 Logout

@@ -6,6 +6,7 @@ import CreateIncidentPage from "@/pages/CreateIncidentPage";
 import EditIncidentPage from "@/pages/EditIncidentPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
+import AccountPage from "@/pages/AccountPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/incidents" element={<IncidentListPage />} />
           <Route path="/incidents/new" element={<CreateIncidentPage />} />
           <Route path="/incidents/:id/edit" element={<EditIncidentPage />} />
+          <Route path="/account" element={<AccountPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

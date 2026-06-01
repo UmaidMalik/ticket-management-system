@@ -21,7 +21,21 @@ export type RegisterRequest = {
   name: string;
   email: string;
   password: string;
-  role: "admin" | "editor" | "viewer";
+};
+
+export type UpdateProfileRequest = {
+  name: string;
+  email: string;
+};
+
+export type UpdateProfileResponse = {
+  token: string;
+  user: AuthUser;
+};
+
+export type ChangePasswordRequest = {
+  current_password: string;
+  new_password: string;
 };
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -68,4 +82,51 @@ export async function getCurrentUser(): Promise<{ user: AuthUser }> {
   });
 
   return handleResponse<{ user: AuthUser }>(response);
+}
+
+export async function updateProfile(
+  data: UpdateProfileRequest
+): Promise<UpdateProfileResponse> {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  return handleResponse<UpdateProfileResponse>(response);
+}
+
+export async function changePassword(
+  data: ChangePasswordRequest
+): Promise<{ message: string }> {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/auth/me/password`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  return handleResponse<{ message: string }>(response);
+}
+
+export async function deleteAccount(): Promise<{ message: string }> {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return handleResponse<{ message: string }>(response);
 }

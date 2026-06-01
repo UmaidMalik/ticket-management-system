@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+import { getUsers } from "@/api/usersApi";
+import { getStoredUser } from "@/lib/auth";
+import type { User } from "@/types";
 import { Link, useNavigate } from "react-router-dom";
 import { createTicket } from "@/api/ticketsApi";
 import type { Ticket } from "@/types";
@@ -13,10 +17,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import { mockUsers } from "@/data/mockUsers";
-
 export default function CreateIncidentPage() {
   const navigate = useNavigate();
+  const [users, setUsers] = useState<User[]>([]);
+  const currentUser = getStoredUser();
+
+  useEffect(() => {
+  async function loadUsers() {
+    try {
+      const userData = await getUsers();
+      setUsers(userData);
+    } catch (error) {
+      console.error("Failed to load users", error);
+    }
+  }
+
+    loadUsers();
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -121,20 +138,26 @@ export default function CreateIncidentPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Incident Reporter</label>
-                  <select name="incident_reporter_id" className="h-10 w-full rounded-md border bg-background px-3 text-sm">
-                    {mockUsers.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.name}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    value={currentUser?.name ?? "Current user"}
+                    disabled
+                    className="h-10 w-full rounded-md border bg-muted px-3 text-sm text-muted-foreground"
+                  />
+                  <input
+                    type="hidden"
+                    name="incident_reporter_id"
+                    value={currentUser?.id ?? ""}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Assigned To</label>
-                  <select name="assigned_to_id" className="h-10 w-full rounded-md border bg-background px-3 text-sm">
+                  <select
+                    name="assigned_to_id"
+                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                  >
                     <option value="">Unassigned</option>
-                    {mockUsers.map((user) => (
+                    {users.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.name}
                       </option>
