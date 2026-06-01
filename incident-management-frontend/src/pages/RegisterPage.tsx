@@ -1,7 +1,8 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { register, type AuthUser } from "@/api/authApi";
+import { register } from "@/api/authApi";
 import { saveAuth } from "@/lib/auth";
 
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-type Role = AuthUser["role"];
 
 export default function RegisterPage() {
   const navigate = useNavigate();
