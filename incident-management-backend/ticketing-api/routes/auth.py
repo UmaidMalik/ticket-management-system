@@ -3,11 +3,10 @@ from datetime import datetime, timedelta, timezone
 import jwt
 import mysql.connector
 from flask import Blueprint, current_app, g, jsonify, request
+from . import auth_bp
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from db import get_db
-
-auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+from utils.auth_utils import get_current_user_from_token
 
 def create_token(user):
     payload = {
@@ -30,44 +29,6 @@ def user_response(user):
         "email": user["email"],
         "role": user["role"],
     }
-
-def get_current_user_from_token():
-    auth_header = request.headers.get("Authorization", "")
-
-    if not auth_header.startswith("Bearer "):
-        return None, (jsonify({"error": "Missing or invalid authorization header"}), 401)
-
-    token = auth_header.replace("Bearer ", "", 1)
-
-    try:
-        payload = jwt.decode(
-            token,
-            current_app.config["JWT_SECRET"],
-            algorithms=["HS256"],
-        )
-    except jwt.ExpiredSignatureError:
-        return None, (jsonify({"error": "Token has expired"}), 401)
-    except jwt.InvalidTokenError:
-        return None, (jsonify({"error": "Invalid token"}), 401)
-
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-
-    cursor.execute(
-        """
-        SELECT id, name, email, role
-        FROM users
-        WHERE id = %s
-        """,
-        (payload["user_id"],),
-    )
-
-    user = cursor.fetchone()
-
-    if not user:
-        return None, (jsonify({"error": "User not found"}), 404)
-
-    return user, None
 
 @auth_bp.route("/register", methods=["POST"])
 def register():

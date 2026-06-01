@@ -147,9 +147,17 @@ export default function AccountPage() {
             </p>
           </div>
 
+        <div className="flex items-center gap-3">
+          {user?.role === "admin" && (
+            <Button variant="outline" asChild>
+              <Link to="/admin/users">User Management</Link>
+            </Button>
+          )}
+
           <Button variant="outline" asChild>
             <Link to="/dashboard">Back to dashboard</Link>
           </Button>
+        </div>
         </div>
 
         <Card>
