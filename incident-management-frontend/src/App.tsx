@@ -8,6 +8,7 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import AccountPage from "@/pages/AccountPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import UserManagementPage from "@/pages/UserManagementPage";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/incidents/new" element={<CreateIncidentPage />} />
           <Route path="/incidents/:id/edit" element={<EditIncidentPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/admin/users" element={<UserManagementPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

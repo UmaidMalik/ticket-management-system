@@ -5,6 +5,8 @@ export type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed";
 export interface User {
     id: number;
     name: string;
+    email?: string;
+    role?: "admin" | "editor" | "viewer";
 }
 
 export interface Ticket {
