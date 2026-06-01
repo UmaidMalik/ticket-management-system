@@ -31,6 +31,44 @@ def user_response(user):
         "role": user["role"],
     }
 
+def get_current_user_from_token():
+    auth_header = request.headers.get("Authorization", "")
+
+    if not auth_header.startswith("Bearer "):
+        return None, (jsonify({"error": "Missing or invalid authorization header"}), 401)
+
+    token = auth_header.replace("Bearer ", "", 1)
+
+    try:
+        payload = jwt.decode(
+            token,
+            current_app.config["JWT_SECRET"],
+            algorithms=["HS256"],
+        )
+    except jwt.ExpiredSignatureError:
+        return None, (jsonify({"error": "Token has expired"}), 401)
+    except jwt.InvalidTokenError:
+        return None, (jsonify({"error": "Invalid token"}), 401)
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT id, name, email, role
+        FROM users
+        WHERE id = %s
+        """,
+        (payload["user_id"],),
+    )
+
+    user = cursor.fetchone()
+
+    if not user:
+        return None, (jsonify({"error": "User not found"}), 404)
+
+    return user, None
+
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json() or {}
@@ -38,18 +76,13 @@ def register():
     name = data.get("name", "").strip()
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
-    role = data.get("role", "editor").strip().lower()
-
-    allowed_roles = {"admin", "editor", "viewer"}
+    role = "viewer" # new users are always viewer initially
 
     if not name or not email or not password:
         return jsonify({"error": "Name, email, and password are required"}), 400
 
     if len(password) < 8:
         return jsonify({"error": "Password must be at least 8 characters"}), 400
-    
-    if role not in allowed_roles:
-        return jsonify({"error": "Invalid role"}), 400
 
     password_hash = generate_password_hash(password)
 
@@ -121,39 +154,140 @@ def login():
 
 @auth_bp.route("/me", methods=["GET"])
 def me():
-    auth_header = request.headers.get("Authorization", "")
+    user, error_response = get_current_user_from_token()
 
-    if not auth_header.startswith("Bearer "):
-        return jsonify({"error": "Missing or invalid authorization header"}), 401
+    if error_response:
+        return error_response
 
-    token = auth_header.replace("Bearer ", "", 1)
+    return jsonify({"user": user_response(user)}), 200
+
+@auth_bp.route("/me", methods=["PATCH"])
+def update_me():
+    user, error_response = get_current_user_from_token()
+
+    if error_response:
+        return error_response
+
+    data = request.get_json() or {}
+
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip().lower()
+
+    if not name or not email:
+        return jsonify({"error": "Name and email are required"}), 400
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
 
     try:
-        payload = jwt.decode(
-            token,
-            current_app.config["JWT_SECRET"],
-            algorithms=["HS256"],
+        cursor.execute(
+            """
+            UPDATE users
+            SET name = %s, email = %s
+            WHERE id = %s
+            """,
+            (name, email, user["id"]),
         )
-    except jwt.ExpiredSignatureError:
-        return jsonify({"error": "Token has expired"}), 401
-    except jwt.InvalidTokenError:
-        return jsonify({"error": "Invalid token"}), 401
+        db.commit()
+    except mysql.connector.IntegrityError:
+        return jsonify({"error": "Email already exists"}), 409
+
+    updated_user = {
+        "id": user["id"],
+        "name": name,
+        "email": email,
+        "role": user["role"],
+    }
+
+    token = create_token(updated_user)
+
+    return jsonify({
+        "token": token,
+        "user": user_response(updated_user),
+    }), 200
+
+@auth_bp.route("/me/password", methods=["PATCH"])
+def change_password():
+    user, error_response = get_current_user_from_token()
+
+    if error_response:
+        return error_response
+
+    data = request.get_json() or {}
+
+    current_password = data.get("current_password", "")
+    new_password = data.get("new_password", "")
+
+    if not current_password or not new_password:
+        return jsonify({"error": "Current password and new password are required"}), 400
+
+    if len(new_password) < 8:
+        return jsonify({"error": "New password must be at least 8 characters"}), 400
 
     db = get_db()
     cursor = db.cursor(dictionary=True)
 
     cursor.execute(
         """
-        SELECT id, name, email, role
+        SELECT password_hash
         FROM users
         WHERE id = %s
         """,
-        (payload["user_id"],),
+        (user["id"],),
     )
 
-    user = cursor.fetchone()
+    row = cursor.fetchone()
 
-    if not user:
-        return jsonify({"error": "User not found"}), 404
+    if not row or not check_password_hash(row["password_hash"], current_password):
+        return jsonify({"error": "Current password is incorrect"}), 401
 
-    return jsonify({"user": user_response(user)}), 200
+    new_password_hash = generate_password_hash(new_password)
+
+    cursor.execute(
+        """
+        UPDATE users
+        SET password_hash = %s
+        WHERE id = %s
+        """,
+        (new_password_hash, user["id"]),
+    )
+    db.commit()
+
+    return jsonify({"message": "Password updated successfully"}), 200
+
+@auth_bp.route("/me", methods=["DELETE"])
+def delete_me():
+    user, error_response = get_current_user_from_token()
+
+    if error_response:
+        return error_response
+
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT COUNT(*) AS ticket_count
+        FROM tickets
+        WHERE incident_reporter_id = %s OR assigned_to_id = %s
+        """,
+        (user["id"], user["id"]),
+    )
+
+    result = cursor.fetchone()
+
+    if result["ticket_count"] > 0:
+        return jsonify({
+            "error": "Account cannot be deleted because it is linked to existing tickets"
+        }), 409
+
+    cursor.execute(
+        """
+        DELETE FROM users
+        WHERE id = %s
+        """,
+        (user["id"],),
+    )
+    db.commit()
+
+    return jsonify({"message": "Account deleted successfully"}), 200

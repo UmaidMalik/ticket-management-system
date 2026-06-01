@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { logout, getStoredUser } from "@/lib/auth";
 import { useEffect, useState } from "react";
 
 import {
@@ -89,6 +90,12 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const currentUser = getStoredUser();
+
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
 
   useEffect(() => {
     async function loadTickets() {
@@ -147,6 +154,20 @@ export default function Dashboard() {
             <p className="text-muted-foreground">
               Track incidents, priorities, assignments, and resolution progress.
             </p>
+
+              <div className="flex items-center gap-2">
+              <Link to="/account">
+              {currentUser && (
+                <span className="text-sm text-muted-foreground">
+                  {currentUser.name} ({currentUser.role})
+                </span>
+              )}
+              </Link>
+
+              <Button variant="outline" onClick={handleLogout}>
+                Logout
+              </Button>
+            </div>
           </div>
 
           <div className="flex gap-2">

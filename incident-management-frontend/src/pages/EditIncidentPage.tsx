@@ -9,29 +9,47 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
+import { getUsers } from "@/api/usersApi";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTicketById, updateTicket, deleteTicket } from "@/api/ticketsApi";
-import type { Ticket } from "@/types";
-import { mockUsers } from "@/data/mockUsers";
+import type { Ticket, User } from "@/types";
 
 export default function EditIncidentPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const [users, setUsers] = useState<User[]>([]);
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadTicket() {
-      const data = await getTicketById(Number(id));
-      setTicket(data ?? null);
+  async function loadData() {
+    try {
+      setIsLoading(true);
+
+      const [ticketData, userData] = await Promise.all([
+        getTicketById(Number(id)),
+        getUsers(),
+      ]);
+
+      if (!ticketData) {
+        setError("Ticket not found.");
+        return;
+      }
+
+      setTicket(ticketData);
+      setUsers(userData);
+    } catch (error) {
+      console.error(error);
+      setError("Could not load incident.");
+    } finally {
       setIsLoading(false);
     }
+  }
 
-    loadTicket();
-  }, [id]);
+  loadData();
+}, [id]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -76,6 +94,14 @@ export default function EditIncidentPage() {
 
   if (isLoading) {
     return <main className="p-6">Loading incident...</main>;
+  }
+
+  if (error) {
+    return (
+      <main className="p-6">
+        <p className="text-destructive">{error}</p>
+      </main>
+    );
   }
   
   if (!ticket) {
@@ -202,7 +228,7 @@ export default function EditIncidentPage() {
                     defaultValue={ticket.incident_reporter_id}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                   >
-                    {mockUsers.map((user) => (
+                    {users.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.name}
                       </option>
@@ -218,7 +244,7 @@ export default function EditIncidentPage() {
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                   >
                     <option value="">Unassigned</option>
-                    {mockUsers.map((user) => (
+                    {users.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.name}
                       </option>
