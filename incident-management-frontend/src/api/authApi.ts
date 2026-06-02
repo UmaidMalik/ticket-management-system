@@ -1,4 +1,5 @@
 import { logout } from "@/lib/auth";
+import { getApiUrl, handleResponse } from "@/api/apiClient";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
@@ -40,36 +41,8 @@ export type ChangePasswordRequest = {
   new_password: string;
 };
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  const contentType = response.headers.get("content-type") ?? "";
-
-  if (!contentType.includes("application/json")) {
-    throw new Error(
-      `Expected JSON but received ${contentType || "unknown content type"}`
-    );
-  }
-
-  const data = await response.json();
-
-  if (response.status === 401) {
-    logout();
-
-    if (window.location.pathname !== "/login") {
-      window.location.href = "/login";
-    }
-
-    throw new Error(data.error || "Session expired. Please log in again.");
-  }
-
-  if (!response.ok) {
-    throw new Error(data.error || "Request failed");
-  }
-
-  return data;
-}
-
 export async function login(data: LoginRequest): Promise<AuthResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+  const response = await fetch(getApiUrl(`/auth/login`), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -81,7 +54,7 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
 }
 
 export async function register(data: RegisterRequest): Promise<AuthResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/register`), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -95,7 +68,7 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
 export async function getCurrentUser(): Promise<{ user: AuthUser }> {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/me`), {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -109,7 +82,7 @@ export async function updateProfile(
 ): Promise<UpdateProfileResponse> {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/me`), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -126,7 +99,7 @@ export async function changePassword(
 ): Promise<{ message: string }> {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE_URL}/auth/me/password`, {
+  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/me/password`), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -141,7 +114,7 @@ export async function changePassword(
 export async function deleteAccount(): Promise<{ message: string }> {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/me`), {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
