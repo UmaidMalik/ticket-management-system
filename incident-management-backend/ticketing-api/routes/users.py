@@ -89,7 +89,7 @@ def update_user_role(user_id):
     if error_response:
         return error_response
 
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     role = data.get("role", "").strip().lower()
 
     allowed_roles = {"admin", "editor", "viewer"}
