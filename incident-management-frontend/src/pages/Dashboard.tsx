@@ -91,6 +91,8 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const currentUser = getStoredUser();
+  const canEditTickets = currentUser?.role === "admin" || currentUser?.role === "editor";
+  const canDeleteTickets = currentUser?.role === "admin";
 
   function handleLogout() {
     logout();
@@ -175,9 +177,11 @@ export default function Dashboard() {
               <Link to="/incidents">View Incidents</Link>
             </Button>
 
-            <Button asChild>
-              <Link to="/incidents/new">Create Incident</Link>
-            </Button>
+            {canEditTickets && (
+              <Button asChild>
+                <Link to="/incidents/new">Create Incident</Link>
+              </Button>
+            )}
           </div>
         </section>
 

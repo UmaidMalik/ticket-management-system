@@ -60,9 +60,11 @@ export default function CreateIncidentPage() {
     <main className="min-h-screen bg-background">
       <header className="border-b bg-white">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-          <Link to="/dashboard" className="text-2xl font-bold text-slate-800">
-            SRE Ticket Dashboard
-          </Link>
+          <Button asChild variant="outline">
+            <Link to="/dashboard" className="text-2xl font-bold text-slate-800">
+              Dashboard
+            </Link>
+          </Button>
 
           <Button asChild variant="outline">
             <Link to="/incidents">Back to Incidents</Link>
@@ -166,7 +168,7 @@ export default function CreateIncidentPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex gap-3">
                 <Button asChild variant="outline">
                   <Link to="/incidents">Cancel</Link>
                 </Button>

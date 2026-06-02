@@ -51,3 +51,14 @@ def require_admin():
         return None, (jsonify({"error": "Admin access required"}), 403)
 
     return user, None
+
+def require_roles(*allowed_roles):
+    user, error_response = get_current_user_from_token()
+
+    if error_response:
+        return None, error_response
+
+    if user["role"] not in allowed_roles:
+        return None, (jsonify({"error": "Insufficient permissions"}), 403)
+
+    return user, None

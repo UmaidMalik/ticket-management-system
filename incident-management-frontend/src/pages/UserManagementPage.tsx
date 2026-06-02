@@ -133,41 +133,52 @@ export default function UserManagementPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Current Role</TableHead>
-                    <TableHead>Change Role</TableHead>
+                    <TableHead className="text-left">Name</TableHead>
+                    <TableHead className="text-left">Email</TableHead>
+                    <TableHead className="text-left">Current Role</TableHead>
+                    <TableHead className="text-left">Change Role</TableHead>
                   </TableRow>
                 </TableHeader>
 
                 <TableBody>
-                  {users.map((user) => (
+                {users.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.role}</TableCell>
-                      <TableCell>
+                    <TableCell className="text-left font-medium">
+                        {user.name}
+                    </TableCell>
+
+                    <TableCell className="text-left">
+                        {user.email}
+                    </TableCell>
+
+                    <TableCell className="text-left capitalize">
+                        {user.role}
+                    </TableCell>
+
+                    <TableCell className="text-left">
+                        <div className="space-y-1">
                         <select
-                          value={user.role}
-                          onChange={(event) =>
+                            value={user.role}
+                            onChange={(event) =>
                             handleRoleChange(user.id, event.target.value as Role)
-                          }
-                          disabled={user.id === currentUser.id}
-                          className="h-10 rounded-md border bg-background px-3 text-sm"
+                            }
+                            disabled={user.id === currentUser?.id}
+                            className="h-10 rounded-md border bg-background px-3 text-sm"
                         >
-                          <option value="viewer">Viewer</option>
-                          <option value="editor">Editor</option>
-                          <option value="admin">Admin</option>
+                            <option value="viewer">Viewer</option>
+                            <option value="editor">Editor</option>
+                            <option value="admin">Admin</option>
                         </select>
 
-                        {user.id === currentUser.id && (
-                          <p className="mt-1 text-xs text-muted-foreground">
+                        {user.id === currentUser?.id && (
+                            <p className="text-xs text-muted-foreground">
                             You cannot change your own role.
-                          </p>
+                            </p>
                         )}
-                      </TableCell>
+                        </div>
+                    </TableCell>
                     </TableRow>
-                  ))}
+                ))}
                 </TableBody>
               </Table>
             )}

@@ -20,7 +20,7 @@ services:
       MYSQL_PASSWORD: ticket_password
       MYSQL_DB: ticketing_system
       MYSQL_PORT: 3306
-      JWT_SECRET: "change-this-demo-secret"
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "5000:5000"
     depends_on:
