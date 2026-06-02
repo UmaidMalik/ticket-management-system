@@ -165,7 +165,10 @@ export default function EditIncidentPage() {
               }
             </CardTitle>
             <CardDescription>
-              View and update incident details, assignment, status, and priority.
+              {canEditTicket 
+                ? `View and update incident details, assignment, status, and priority.`
+                : `View incident details, assignment, status, and priority.`
+              }
             </CardDescription>
           </CardHeader>
 
