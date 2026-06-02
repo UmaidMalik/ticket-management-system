@@ -1,7 +1,4 @@
-import { logout } from "@/lib/auth";
-import { getApiUrl, handleResponse } from "@/api/apiClient";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/api/apiClient";
 
 export type AuthUser = {
   id: number;
@@ -42,84 +39,35 @@ export type ChangePasswordRequest = {
 };
 
 export async function login(data: LoginRequest): Promise<AuthResponse> {
-  const response = await fetch(getApiUrl(`/auth/login`), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse<AuthResponse>(response);
+  return apiPost<AuthResponse, LoginRequest>("/auth/login", data);
 }
 
 export async function register(data: RegisterRequest): Promise<AuthResponse> {
-  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/register`), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse<AuthResponse>(response);
+  return apiPost<AuthResponse, RegisterRequest>("/auth/register", data);
 }
 
 export async function getCurrentUser(): Promise<{ user: AuthUser }> {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/me`), {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return handleResponse<{ user: AuthUser }>(response);
+  return apiGet<{ user: AuthUser }>("/auth/me");
 }
 
 export async function updateProfile(
   data: UpdateProfileRequest
 ): Promise<UpdateProfileResponse> {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/me`), {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse<UpdateProfileResponse>(response);
+  return apiPatch<UpdateProfileResponse, UpdateProfileRequest>(
+    "/auth/me",
+    data
+  );
 }
 
 export async function changePassword(
   data: ChangePasswordRequest
 ): Promise<{ message: string }> {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/me/password`), {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse<{ message: string }>(response);
+  return apiPatch<{ message: string }, ChangePasswordRequest>(
+    "/auth/me/password",
+    data
+  );
 }
 
 export async function deleteAccount(): Promise<{ message: string }> {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(getApiUrl(`${API_BASE_URL}/auth/me`), {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return handleResponse<{ message: string }>(response);
+  return apiDelete<{ message: string }>("/auth/me");
 }

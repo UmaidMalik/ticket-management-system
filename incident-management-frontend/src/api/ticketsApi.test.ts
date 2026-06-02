@@ -1,35 +1,37 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { getTickets } from "@/api/ticketsApi";
-import { headers } from "happy-dom/lib/PropertySymbol";
+
+const mockTickets = [
+  {
+    id: 1,
+    title: "Test ticket",
+    description: "Test description",
+    category: "Software",
+    impact: "High",
+    priority: "High",
+    status: "Open",
+    incident_reporter_id: 1,
+    assigned_to_id: 2,
+    created_at: "2026-05-26T10:00:00Z",
+    resolved_at: null,
+  },
+];
 
 describe("ticketsApi", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    localStorage.clear();
   });
 
   it("fetches tickets from the backend", async () => {
-    const mockTickets = [
-      {
-        id: 1,
-        title: "Production API returning 500 errors",
-        description: "Multiple users are reporting failed requests.",
-        category: "Software",
-        impact: "Critical",
-        priority: "Critical",
-        status: "Open",
-        incident_reporter_id: 1,
-        assigned_to_id: 3,
-        assignee_name: "Karim",
-        reporter_name: "Umaid",
-        created_at: "Tue, 26 May 2026 14:26:06 GMT",
-        resolved_at: null,
-      },
-    ];
-
     const fetchMock = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => mockTickets,
-    } as Response);
+      ok: true,
+      status: 200,
+      headers: new Headers({
+        "content-type": "application/json",
+      }),
+      json: async () => mockTickets,
+    });
 
     vi.stubGlobal("fetch", fetchMock);
 
@@ -38,11 +40,13 @@ describe("ticketsApi", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:5000/tickets",
       expect.objectContaining({
+        method: "GET",
         headers: expect.objectContaining({
           "Content-Type": "application/json",
         }),
       })
     );
+
     expect(result).toEqual(mockTickets);
   });
 });
