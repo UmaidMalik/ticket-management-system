@@ -6,6 +6,19 @@ from utils.auth_utils import get_current_user_from_token, require_roles
 
 @tickets_bp.route('/tickets', methods=['GET'])
 def get_tickets():
+    """
+    Get all tickets.
+    ---
+    tags:
+      - Tickets
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: List of tickets
+      401:
+        description: Missing, invalid, or expired token
+    """
     current_user, error_response = get_current_user_from_token()
     if error_response:
         return error_response
