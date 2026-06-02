@@ -82,7 +82,7 @@ def register():
       409:
         description: Email already exists
     """
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     name = data.get("name", "").strip()
     email = data.get("email", "").strip().lower()
@@ -174,7 +174,7 @@ def login():
       401:
         description: Invalid email or password
     """
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
@@ -284,7 +284,7 @@ def update_me():
     if error_response:
         return error_response
 
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     name = data.get("name", "").strip()
     email = data.get("email", "").strip().lower()
@@ -360,7 +360,7 @@ def change_password():
     if error_response:
         return error_response
 
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     current_password = data.get("current_password", "")
     new_password = data.get("new_password", "")
