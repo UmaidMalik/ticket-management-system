@@ -53,7 +53,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
   if (response.status === 401) {
     logout();
-    window.location.href = "/login";
+
+    if (window.location.pathname !== "/login") {
+      window.location.href = "/login";
+    }
+
     throw new Error(data.error || "Session expired. Please log in again.");
   }
 
