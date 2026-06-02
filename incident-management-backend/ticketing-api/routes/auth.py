@@ -81,6 +81,49 @@ def register():
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
+    """
+    Login user and return JWT token.
+    ---
+    tags:
+      - Auth
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              example: umaid@example.com
+            password:
+              type: string
+              example: Password123!
+    responses:
+      200:
+        description: Login successful
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+            user:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                email:
+                  type: string
+                role:
+                  type: string
+      401:
+        description: Invalid email or password
+    """
     data = request.get_json() or {}
 
     email = data.get("email", "").strip().lower()

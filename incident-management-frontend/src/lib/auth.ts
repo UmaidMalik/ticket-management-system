@@ -24,8 +24,30 @@ export function getStoredUser(): AuthUser | null {
   }
 }
 
+export function isTokenExpired(token: string) {
+  try {
+    const payloadBase64 = token.split(".")[1];
+    const payload = JSON.parse(atob(payloadBase64));
+
+    if (!payload.exp) return false;
+
+    return Date.now() >= payload.exp * 1000;
+  } catch {
+    return true;
+  }
+}
+
 export function isAuthenticated() {
-  return Boolean(getToken());
+  const token = getToken();
+
+  if (!token) return false;
+
+  if (isTokenExpired(token)) {
+    logout();
+    return false;
+  }
+
+  return true;
 }
 
 export function logout() {
