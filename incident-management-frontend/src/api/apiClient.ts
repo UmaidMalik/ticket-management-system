@@ -1,4 +1,4 @@
-import { logout } from "@/lib/auth";
+import { getAuthHeaders, logout } from "@/lib/auth";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
@@ -32,4 +32,61 @@ export async function handleResponse<T>(response: Response): Promise<T> {
   }
 
   return data;
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
+  const response = await fetch(getApiUrl(path), {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  return handleResponse<T>(response);
+}
+
+export async function apiPost<T, TBody = unknown>(
+  path: string,
+  body: TBody
+): Promise<T> {
+  const response = await fetch(getApiUrl(path), {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(body),
+  });
+
+  return handleResponse<T>(response);  
+}
+
+export async function apiPatch<T, TBody = unknown>(
+  path: string,
+  body: TBody
+): Promise<T> {
+  const response = await fetch(getApiUrl(path), {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(body),
+  });
+
+  return handleResponse<T>(response);
+}
+
+export async function apiPut<T, TBody = unknown>(
+  path: string,
+  body: TBody
+): Promise<T> {
+  const response = await fetch(getApiUrl(path), {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(body),
+  });
+
+  return handleResponse<T>(response);
+}
+
+export async function apiDelete<T>(path: string): Promise<T> {
+  const response = await fetch(getApiUrl(path), {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  return handleResponse<T>(response);
 }

@@ -1,6 +1,5 @@
 import type { Ticket } from "@/types";
-import { getAuthHeaders } from "@/lib/auth";
-import { getApiUrl, handleResponse } from "@/api/apiClient";
+import { apiGet, apiPost, apiPut, apiDelete } from "@/api/apiClient";
 
 export type CreateTicketRequest = Omit<
   Ticket,
@@ -12,59 +11,24 @@ export type UpdateTicketRequest = Partial<
 >;
 
 export async function getTickets(): Promise<Ticket[]> {
-  const response = await fetch(getApiUrl("/tickets"), {
-    headers: getAuthHeaders(),
-  });
-
-  return handleResponse<Ticket[]>(response);
+  return apiGet<Ticket[]>("/tickets");
 }
 
 export async function getTicketById(id: number): Promise<Ticket> {
-  const response = await fetch(getApiUrl(`/tickets/${id}`), {
-    headers: getAuthHeaders(),
-  });
-  return handleResponse<Ticket>(response);
+  return apiGet<Ticket>(`/tickets/${id}`);
 }
 
 export async function createTicket(data: CreateTicketRequest): Promise<Ticket> {
-  const response = await fetch(getApiUrl("/tickets"), {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse<Ticket>(response);
+  return apiPost<Ticket, CreateTicketRequest>("/tickets", data);
 }
 
 export async function updateTicket(
   id: number,
   data: UpdateTicketRequest
 ): Promise<Ticket> {
-  const response = await fetch(getApiUrl(`/tickets/${id}`), {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse<Ticket>(response);
+  return apiPut<Ticket, UpdateTicketRequest>(`/tickets/${id}`, data);
 }
 
-export async function deleteTicket(id: number): Promise<void> {
-  const response = await fetch(getApiUrl(`/tickets/${id}`), {
-    method: "DELETE",
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    let message = "Failed to delete ticket";
-
-    try {
-      const errorBody = await response.json();
-      message = errorBody.error || errorBody.message || message;
-    } catch {
-
-    }
-
-    throw new Error(message);
-  }
+export async function deleteTicket(id: number): Promise<{message: string}> {
+  return apiDelete<{ message: string }>(`/tickets/${id}`);
 }
