@@ -6,10 +6,32 @@ from routes import users_bp, tickets_bp
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from routes.auth import auth_bp
 import time
+from flasgger import Swagger
 
 app = Flask(__name__)
 app.config["JWT_SECRET"] = os.getenv("JWT_SECRET", "dev-secret-change-me")
 CORS(app)
+
+swagger_template = {
+    "swagger": "2.0",
+    "info": {
+        "title": "Ticket Management API",
+        "description": "API documentation for the Incident Ticket Management System.",
+        "version": "1.0.0",
+    },
+    "basePath": "/",
+    "schemes": ["http", "https"],
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT Authorization header using the Bearer scheme. Example: Bearer <token>",
+        }
+    },
+}
+
+Swagger(app, template=swagger_template)
 
 REQUEST_COUNT = Counter(
     "flask_http_requests_total",
@@ -80,6 +102,27 @@ def test_error():
 
 @app.route("/health")
 def health():
+    """
+    Health check endpoint.
+    ---
+    tags:
+      - Health
+    responses:
+      200:
+        description: Backend is running
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: ok
+            service:
+              type: string
+              example: ticketing-api
+            message:
+              type: string
+              example: Backend is running
+    """
     return {
         "status": "ok",
         "service": "ticketing-api",
