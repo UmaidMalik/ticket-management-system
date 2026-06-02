@@ -37,7 +37,7 @@ jobs:
 
             echo "Waiting for backend to become healthy..."
             for i in {1..30}; do
-              if curl -fsS http://localhost:5000/tickets > /dev/null; then
+              if curl -fsS http://localhost:5000/health > /dev/null; then
                 echo "Backend is healthy."
                 exit 0
               fi
