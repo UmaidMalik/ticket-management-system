@@ -26,6 +26,9 @@ jobs:
             echo "Pulling latest code..."
             git pull origin main
 
+            echo "Writing runtime environment file..."
+            printf "JWT_SECRET=%s\n" "${{ secrets.JWT_SECRET }}" > .env
+
             echo "Rebuilding backend container only..."
             docker compose up -d --build --no-deps backend
 
