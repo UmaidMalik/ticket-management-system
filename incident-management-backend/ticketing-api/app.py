@@ -26,7 +26,7 @@ swagger_template = {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header",
-            "description": "JWT Authorization header using the Bearer scheme. Example: Bearer <token>",
+            "description": "Enter JWT token as: Bearer <token>",
         }
     },
 }
