@@ -8,6 +8,8 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import AccountPage from "@/pages/AccountPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
+import EditorRoute from "@/components/EditorRoute";
 import UserManagementPage from "@/pages/UserManagementPage";
 
 export default function App() {
@@ -22,9 +24,14 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/incidents" element={<IncidentListPage />} />
-          <Route path="/incidents/new" element={<CreateIncidentPage />} />
-          <Route path="/incidents/:id/edit" element={<EditIncidentPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/incidents/:id/edit" element={<EditIncidentPage />} />
+        </Route>
+
+        <Route element={<EditorRoute />}>
+          <Route path="/incidents/new" element={<CreateIncidentPage />} />
+        </Route>
+        <Route element={<AdminRoute />}>
           <Route path="/admin/users" element={<UserManagementPage />} />
         </Route>
       </Routes>

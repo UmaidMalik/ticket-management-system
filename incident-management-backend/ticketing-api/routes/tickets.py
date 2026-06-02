@@ -2,9 +2,13 @@ from flask import jsonify, request, g
 from . import tickets_bp
 from db import get_db
 from datetime import datetime
+from routes.auth import get_current_user_from_token, require_roles
 
 @tickets_bp.route('/tickets', methods=['GET'])
 def get_tickets():
+    current_user, error_response = get_current_user_from_token()
+    if error_response:
+        return error_response
     db = get_db()
     cursor = db.cursor(dictionary=True)
 
@@ -36,6 +40,9 @@ def get_tickets():
 
 @tickets_bp.route('/tickets/<int:ticket_id>', methods=['GET'])
 def get_ticket(ticket_id):
+    current_user, error_response = get_current_user_from_token()
+    if error_response:
+        return error_response    
     db = get_db()
     cursor = db.cursor(dictionary=True)
 
@@ -58,6 +65,9 @@ def get_ticket(ticket_id):
 
 @tickets_bp.route('/tickets', methods=['POST'])
 def create_ticket():
+    current_user, error_response = require_roles("admin", "editor")
+    if error_response:
+        return error_response
     data = request.json
     if not data or not all(k in data for k in ['title', 'description', 'category', 'impact', 'priority', 'incident_reporter_id']):
         return jsonify({'error': 'Missing required fields'}), 400
@@ -85,8 +95,11 @@ def create_ticket():
 
     return jsonify({'id': ticket_id, 'message': 'Ticket created'}), 201
 
-@tickets_bp.route('/tickets/<int:ticket_id>', methods=['PUT'])
+@tickets_bp.route('/tickets/<int:ticket_id>', methods=['PUT', 'PATCH'])
 def update_ticket(ticket_id):
+    current_user, error_response = require_roles("admin", "editor")
+    if error_response:
+        return error_response    
     data = request.json
     db = get_db()
     cursor = db.cursor()
@@ -127,6 +140,9 @@ def update_ticket(ticket_id):
 
 @tickets_bp.route('/tickets/<int:ticket_id>/assign', methods=['PATCH'])
 def assign_ticket(ticket_id):
+    current_user, error_response = require_roles("admin", "editor")
+    if error_response:
+        return error_response 
     data = request.json
     db = get_db()
     cursor = db.cursor()
@@ -140,6 +156,9 @@ def assign_ticket(ticket_id):
 
 @tickets_bp.route('/tickets/<int:ticket_id>', methods=['DELETE'])
 def delete_ticket(ticket_id):
+    current_user, error_response = require_roles("admin")
+    if error_response:
+        return error_response 
     db = get_db()
     cursor = db.cursor()
 

@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTicketById, updateTicket, deleteTicket } from "@/api/ticketsApi";
 import type { Ticket, User } from "@/types";
+import { getStoredUser } from "@/lib/auth";
 
 export default function EditIncidentPage() {
   const { id } = useParams();
@@ -22,6 +23,10 @@ export default function EditIncidentPage() {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const currentUser = getStoredUser();
+  const canEditTicket = currentUser?.role === "admin" || currentUser?.role === "editor";
+  const canDeleteTicket = currentUser?.role === "admin";
 
   useEffect(() => {
   async function loadData() {
@@ -54,6 +59,11 @@ export default function EditIncidentPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (!canEditTicket) {
+      setError("You do not have permission to edit tickets.");
+      return;
+    }
+
     if (!ticket) return;
 
     const formData = new FormData(event.currentTarget);
@@ -76,6 +86,11 @@ export default function EditIncidentPage() {
 
   async function handleDelete() {
     if (!ticket) return;
+
+    if (!canDeleteTicket) {
+      setError("Only admins can delete tickets.");
+      return;
+    }
 
     const confirmed = window.confirm(
       `Are you sure you want to delete incident #${ticket.id}? This cannot be undone.`
@@ -129,10 +144,11 @@ export default function EditIncidentPage() {
     <main className="min-h-screen bg-background">
       <header className="border-b bg-white">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-          <Link to="/dashboard" className="text-2xl font-bold text-slate-800">
-            IncidentFlow
-          </Link>
-
+          <Button asChild variant="outline">
+            <Link to="/dashboard" className="text-2xl font-bold text-slate-800">
+              Dashboard
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link to="/incidents">Back to Incidents</Link>
           </Button>
@@ -142,7 +158,12 @@ export default function EditIncidentPage() {
       <section className="mx-auto max-w-3xl px-6 py-8">
         <Card>
           <CardHeader>
-            <CardTitle>Edit Incident #{ticket.id}</CardTitle>
+            <CardTitle>
+              {canEditTicket 
+                ? `Edit Incident #${ticket.id}` 
+                : `Incident #${ticket.id}` 
+              }
+            </CardTitle>
             <CardDescription>
               View and update incident details, assignment, status, and priority.
             </CardDescription>
@@ -152,12 +173,12 @@ export default function EditIncidentPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Title</label>
-                <Input name="title" defaultValue={ticket.title} />
+                <Input name="title" defaultValue={ticket.title} disabled={!canEditTicket} />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Description</label>
-                <Textarea name="description" defaultValue={ticket.description} rows={5} />
+                <Textarea name="description" defaultValue={ticket.description} disabled={!canEditTicket} rows={5} />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -167,6 +188,7 @@ export default function EditIncidentPage() {
                     name="category"
                     defaultValue={ticket.category}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    disabled={!canEditTicket}
                   >
                     <option>Network</option>
                     <option>Hardware</option>
@@ -181,6 +203,7 @@ export default function EditIncidentPage() {
                     name="status"
                     defaultValue={ticket.status}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    disabled={!canEditTicket}
                   >
                     <option>Open</option>
                     <option>In Progress</option>
@@ -197,6 +220,7 @@ export default function EditIncidentPage() {
                     name="impact"
                     defaultValue={ticket.impact}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    disabled={!canEditTicket}
                   >
                     <option>Low</option>
                     <option>Medium</option>
@@ -211,6 +235,7 @@ export default function EditIncidentPage() {
                     name="priority"
                     defaultValue={ticket.priority}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    disabled={!canEditTicket}
                   >
                     <option>Low</option>
                     <option>Medium</option>
@@ -227,6 +252,7 @@ export default function EditIncidentPage() {
                     name="incident_reporter_id"
                     defaultValue={ticket.incident_reporter_id}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    disabled={!canEditTicket}
                   >
                     {users.map((user) => (
                       <option key={user.id} value={user.id}>
@@ -242,6 +268,7 @@ export default function EditIncidentPage() {
                     name="assigned_to_id"
                     defaultValue={ticket.assigned_to_id ?? ""}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    disabled={!canEditTicket}
                   >
                     <option value="">Unassigned</option>
                     {users.map((user) => (
@@ -265,7 +292,9 @@ export default function EditIncidentPage() {
                 </div>
               </div>
 
+              {canEditTicket ? (
               <div className="flex justify-between gap-3 pt-4">
+                {canDeleteTicket && (
                 <Button
                   type="button"
                   variant="destructive"
@@ -273,6 +302,7 @@ export default function EditIncidentPage() {
                 >
                   Delete Incident
                 </Button>
+                )}
 
                 <div className="flex gap-3">
                   <Button asChild variant="outline">
@@ -282,6 +312,11 @@ export default function EditIncidentPage() {
                   <Button type="submit">Save Changes</Button>
                 </div>
               </div>
+              ) : (
+                <div className="rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground">
+                  You have viewer access. You can view incident details, but you cannot edit this ticket.
+                </div>                
+              )}
             </form>
           </CardContent>
         </Card>

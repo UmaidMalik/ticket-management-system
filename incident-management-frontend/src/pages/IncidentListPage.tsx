@@ -19,6 +19,7 @@ import { getTickets } from "@/api/ticketsApi";
 import { getUsers } from "@/api/usersApi";
 import { getUserNameById } from "@/lib/users";
 import type { Ticket, TicketLevel, TicketStatus, User } from "@/types";
+import { getStoredUser } from "@/lib/auth";
 
 function getStatusBadgeVariant(status: TicketStatus) {
   if (status === "Open") return "default";
@@ -54,6 +55,9 @@ export default function IncidentListPage() {
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [priorityFilter, setPriorityFilter] = useState("All Priorities");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
+  const currentUser = getStoredUser();
+  const canEditTickets = currentUser?.role === "admin" || currentUser?.role === "editor";
+  const canDeleteTickets = currentUser?.role === "admin";
 
   useEffect(() => {
     async function loadData() {
@@ -123,12 +127,14 @@ export default function IncidentListPage() {
             Incident Management Dashboard
           </h1>
 
-          <Button asChild>
-            <Link to="/incidents/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Incident
-            </Link>
-          </Button>
+          {canEditTickets && (
+            <Button asChild>
+              <Link to="/incidents/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Incident
+              </Link>
+            </Button>
+          )}
         </div>
 
         <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -243,7 +249,7 @@ export default function IncidentListPage() {
                       <Button asChild variant="ghost" size="sm">
                           <Link to={`/incidents/${ticket.id}/edit`}>
                             <Eye className="mr-1 h-4 w-4" />
-                              View
+                              {canEditTickets ? "Edit" : "View"}
                            </Link>
                       </Button>
                     </TableCell>
