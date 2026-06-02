@@ -53,6 +53,27 @@ def get_tickets():
 
 @tickets_bp.route('/tickets/<int:ticket_id>', methods=['GET'])
 def get_ticket(ticket_id):
+    """
+    Get a ticket by ID.
+    ---
+    tags:
+      - Tickets
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: ticket_id
+        required: true
+        type: integer
+        description: ID of the ticket to retrieve
+    responses:
+      200:
+        description: Ticket returned successfully
+      401:
+        description: Missing, invalid, or expired token
+      404:
+        description: Ticket not found
+    """
     current_user, error_response = get_current_user_from_token()
     if error_response:
         return error_response    
@@ -78,6 +99,58 @@ def get_ticket(ticket_id):
 
 @tickets_bp.route('/tickets', methods=['POST'])
 def create_ticket():
+    """
+    Create a new ticket.
+    ---
+    tags:
+      - Tickets
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - title
+            - description
+            - category
+            - impact
+            - priority
+            - status
+          properties:
+            title:
+              type: string
+              example: Production API returning 500 errors
+            description:
+              type: string
+              example: Multiple users are reporting failed API requests.
+            category:
+              type: string
+              example: Software
+            impact:
+              type: string
+              example: High
+            priority:
+              type: string
+              example: Critical
+            status:
+              type: string
+              example: Open
+            assigned_to_id:
+              type: integer
+              example: 3
+    responses:
+      201:
+        description: Ticket created successfully
+      400:
+        description: Missing or invalid ticket data
+      401:
+        description: Missing, invalid, or expired token
+      403:
+        description: Insufficient permissions
+    """
     current_user, error_response = require_roles("admin", "editor")
     if error_response:
         return error_response
@@ -110,6 +183,53 @@ def create_ticket():
 
 @tickets_bp.route('/tickets/<int:ticket_id>', methods=['PUT', 'PATCH'])
 def update_ticket(ticket_id):
+    """
+    Update an existing ticket.
+    ---
+    tags:
+      - Tickets
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: ticket_id
+        required: true
+        type: integer
+        description: ID of the ticket to update
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            category:
+              type: string
+            impact:
+              type: string
+            priority:
+              type: string
+            status:
+              type: string
+            incident_reporter_id:
+              type: integer
+            assigned_to_id:
+              type: integer
+    responses:
+      200:
+        description: Ticket updated successfully
+      400:
+        description: Missing or invalid ticket data
+      401:
+        description: Missing, invalid, or expired token
+      403:
+        description: Insufficient permissions
+      404:
+        description: Ticket not found
+    """
     current_user, error_response = require_roles("admin", "editor")
     if error_response:
         return error_response    
@@ -153,6 +273,53 @@ def update_ticket(ticket_id):
 
 @tickets_bp.route('/tickets/<int:ticket_id>/assign', methods=['PATCH'])
 def assign_ticket(ticket_id):
+    """
+    Update an existing ticket.
+    ---
+    tags:
+      - Tickets
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: ticket_id
+        required: true
+        type: integer
+        description: ID of the ticket to update
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            category:
+              type: string
+            impact:
+              type: string
+            priority:
+              type: string
+            status:
+              type: string
+            incident_reporter_id:
+              type: integer
+            assigned_to_id:
+              type: integer
+    responses:
+      200:
+        description: Ticket updated successfully
+      400:
+        description: Missing or invalid ticket data
+      401:
+        description: Missing, invalid, or expired token
+      403:
+        description: Insufficient permissions
+      404:
+        description: Ticket not found
+    """
     current_user, error_response = require_roles("admin", "editor")
     if error_response:
         return error_response 
@@ -169,6 +336,29 @@ def assign_ticket(ticket_id):
 
 @tickets_bp.route('/tickets/<int:ticket_id>', methods=['DELETE'])
 def delete_ticket(ticket_id):
+    """
+    Delete a ticket.
+    ---
+    tags:
+      - Tickets
+    security:
+      - Bearer: []
+    parameters:
+      - in: path
+        name: ticket_id
+        required: true
+        type: integer
+        description: ID of the ticket to delete
+    responses:
+      200:
+        description: Ticket deleted successfully
+      401:
+        description: Missing, invalid, or expired token
+      403:
+        description: Admin access required
+      404:
+        description: Ticket not found
+    """
     current_user, error_response = require_roles("admin")
     if error_response:
         return error_response 

@@ -32,6 +32,56 @@ def user_response(user):
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
+    """
+    Register a new user.
+    ---
+    tags:
+      - Auth
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - name
+            - email
+            - password
+          properties:
+            name:
+              type: string
+              example: Test User
+            email:
+              type: string
+              example: test@example.com
+            password:
+              type: string
+              example: 12345678
+    responses:
+      201:
+        description: User registered successfully
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+            user:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                email:
+                  type: string
+                role:
+                  type: string
+                  example: viewer
+      400:
+        description: Missing or invalid registration data
+      409:
+        description: Email already exists
+    """
     data = request.get_json() or {}
 
     name = data.get("name", "").strip()
@@ -98,10 +148,10 @@ def login():
           properties:
             email:
               type: string
-              example: umaid@example.com
+              example: mail@example.com
             password:
               type: string
-              example: Password123!
+              example: 12345678
     responses:
       200:
         description: Login successful
@@ -158,6 +208,35 @@ def login():
 
 @auth_bp.route("/me", methods=["GET"])
 def me():
+    """
+    Get the currently authenticated user.
+    ---
+    tags:
+      - Auth
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Current user returned successfully
+        schema:
+          type: object
+          properties:
+            user:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                email:
+                  type: string
+                role:
+                  type: string
+      401:
+        description: Missing, invalid, or expired token
+      404:
+        description: User not found
+    """
     user, error_response = get_current_user_from_token()
 
     if error_response:
@@ -167,6 +246,39 @@ def me():
 
 @auth_bp.route("/me", methods=["PATCH"])
 def update_me():
+    """
+    Update the current user's name and email.
+    ---
+    tags:
+      - Auth
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - name
+            - email
+          properties:
+            name:
+              type: string
+              example: John Doe
+            email:
+              type: string
+              example: John.Doe@example.com
+    responses:
+      200:
+        description: Profile updated successfully
+      400:
+        description: Name and email are required
+      401:
+        description: Missing, invalid, or expired token
+      409:
+        description: Email already exists
+    """
     user, error_response = get_current_user_from_token()
 
     if error_response:
@@ -212,6 +324,37 @@ def update_me():
 
 @auth_bp.route("/me/password", methods=["PATCH"])
 def change_password():
+    """
+    Change the current user's password.
+    ---
+    tags:
+      - Auth
+    security:
+      - Bearer: []
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - current_password
+            - new_password
+          properties:
+            current_password:
+              type: string
+              example: 12345678
+            new_password:
+              type: string
+              example: 123456789
+    responses:
+      200:
+        description: Password updated successfully
+      400:
+        description: Current password and new password are required
+      401:
+        description: Current password is incorrect or token is invalid
+    """
     user, error_response = get_current_user_from_token()
 
     if error_response:
@@ -261,6 +404,21 @@ def change_password():
 
 @auth_bp.route("/me", methods=["DELETE"])
 def delete_me():
+    """
+    Delete the current user's account.
+    ---
+    tags:
+      - Auth
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Account deleted successfully
+      401:
+        description: Missing, invalid, or expired token
+      409:
+        description: Account cannot be deleted because it is linked to existing tickets
+    """
     user, error_response = get_current_user_from_token()
 
     if error_response:
