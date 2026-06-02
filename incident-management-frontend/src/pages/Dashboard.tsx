@@ -92,7 +92,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const currentUser = getStoredUser();
   const canEditTickets = currentUser?.role === "admin" || currentUser?.role === "editor";
-  const canDeleteTickets = currentUser?.role === "admin";
 
   function handleLogout() {
     logout();

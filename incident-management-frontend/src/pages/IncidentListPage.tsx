@@ -57,7 +57,6 @@ export default function IncidentListPage() {
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const currentUser = getStoredUser();
   const canEditTickets = currentUser?.role === "admin" || currentUser?.role === "editor";
-  const canDeleteTickets = currentUser?.role === "admin";
 
   useEffect(() => {
     async function loadData() {
