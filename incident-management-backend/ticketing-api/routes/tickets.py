@@ -2,7 +2,7 @@ from flask import jsonify, request, g
 from . import tickets_bp
 from db import get_db
 from datetime import datetime
-from routes.auth import get_current_user_from_token, require_roles
+from utils.auth_utils import get_current_user_from_token, require_roles
 
 @tickets_bp.route('/tickets', methods=['GET'])
 def get_tickets():
