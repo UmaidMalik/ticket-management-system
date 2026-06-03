@@ -28,6 +28,8 @@ jobs:
 
             echo "Writing runtime environment file..."
             printf "JWT_SECRET=%s\n" "${{ secrets.JWT_SECRET }}" > .env
+            printf "SWAGGER_HOST=%s\n" "${{ secrets.SWAGGER_HOST }}" >> .env
+            printf "SWAGGER_SCHEME=%s\n" "${{ secrets.SWAGGER_SCHEME }}" >> .env
 
             echo "Rebuilding backend container only..."
             docker compose up -d --build --no-deps backend
