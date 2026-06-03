@@ -1,5 +1,6 @@
 import { Eye, Filter, Plus, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import AppHeader from "@/components/AppHeader";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -110,155 +111,149 @@ export default function IncidentListPage() {
   });
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-          <Link to="/dashboard" className="text-2xl font-bold text-slate-800">
-            SRE Ticket Dashboard
-          </Link>
+    <div className="min-h-screen bg-muted/40">
+      <AppHeader/>
+      <main className="mx-auto w-full max-w-[1500px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
 
-        </div>
-      </header>
+        <section className="space-y-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-      <section className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Incident Management Dashboard
-          </h1>
-
-          {canEditTickets && (
-            <Button asChild>
-              <Link to="/incidents/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Incident
-              </Link>
-            </Button>
-          )}
-        </div>
-
-        <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              className="pl-9"
-              placeholder="Search by ID, title, description, or assignee"
-            />
+            {canEditTickets && (
+              <Button asChild className="w-full sm:w-auto">
+                <Link to="/incidents/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Incident
+                </Link>
+              </Button>
+            )}
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Filter className="h-4 w-4" />
-            Filters:
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+            <div className="relative min-w-0 flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                className="pl-9"
+                placeholder="Search by ID, title, description, or assignee"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Filter className="h-4 w-4" />
+              Filters:
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3 xl:flex">
+            <select 
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="h-10 rounded-md border bg-background px-3 text-sm">
+              <option>All Statuses</option>
+              <option>Open</option>
+              <option>In Progress</option>
+              <option>Resolved</option>
+              <option>Closed</option>
+            </select>
+
+            <select 
+              value={priorityFilter}
+              onChange={(event) => setPriorityFilter(event.target.value)}
+              className="h-10 rounded-md border bg-background px-3 text-sm">
+              <option>All Priorities</option>
+              <option>Critical</option>
+              <option>High</option>
+              <option>Medium</option>
+              <option>Low</option>
+            </select>
+
+            <select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)} 
+              className="h-10 rounded-md border bg-background px-3 text-sm">
+              <option>All Categories</option>
+              <option>Network</option>
+              <option>Hardware</option>
+              <option>Software</option>
+              <option>Security</option>
+            </select>
+            </div>
           </div>
 
-          <select 
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-            className="h-10 rounded-md border bg-background px-3 text-sm">
-            <option>All Statuses</option>
-            <option>Open</option>
-            <option>In Progress</option>
-            <option>Resolved</option>
-            <option>Closed</option>
-          </select>
-
-          <select 
-            value={priorityFilter}
-            onChange={(event) => setPriorityFilter(event.target.value)}
-            className="h-10 rounded-md border bg-background px-3 text-sm">
-            <option>All Priorities</option>
-            <option>Critical</option>
-            <option>High</option>
-            <option>Medium</option>
-            <option>Low</option>
-          </select>
-
-          <select
-            value={categoryFilter}
-            onChange={(event) => setCategoryFilter(event.target.value)} 
-            className="h-10 rounded-md border bg-background px-3 text-sm">
-            <option>All Categories</option>
-            <option>Network</option>
-            <option>Hardware</option>
-            <option>Software</option>
-            <option>Security</option>
-          </select>
-        </div>
-
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Impact</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Assignee</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {filteredTickets.map((ticket) => (
-                  <TableRow key={ticket.id}>
-                    <TableCell className="font-medium text-blue-600">
-                      #{ticket.id}
-                    </TableCell>
-
-                    <TableCell className="font-medium">
-                      {ticket.title}
-                    </TableCell>
-
-                    <TableCell className="text-muted-foreground">
-                      {ticket.category}
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge className={getPriorityClass(ticket.priority)}>
-                        {ticket.priority.toUpperCase()}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge className={getPriorityClass(ticket.impact)}>
-                        {ticket.impact.toUpperCase()}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge variant={getStatusBadgeVariant(ticket.status)}>
-                        {ticket.status}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="text-muted-foreground">
-                      {formatDate(ticket.created_at)}
-                    </TableCell>
-
-                    <TableCell className="text-muted-foreground">
-                      {getUserNameById(users, ticket.assigned_to_id)}
-                    </TableCell>
-
-                    <TableCell>
-                      <Button asChild variant="ghost" size="sm">
-                          <Link to={`/incidents/${ticket.id}/edit`}>
-                            <Eye className="mr-1 h-4 w-4" />
-                              {canEditTickets ? "Edit" : "View"}
-                           </Link>
-                      </Button>
-                    </TableCell>
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Impact</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Assignee</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </section>
-    </main>
+                </TableHeader>
+
+                <TableBody>
+                  {filteredTickets.map((ticket) => (
+                    <TableRow key={ticket.id}>
+                      <TableCell className="font-medium text-blue-600">
+                        #{ticket.id}
+                      </TableCell>
+
+                      <TableCell className="font-medium">
+                        {ticket.title}
+                      </TableCell>
+
+                      <TableCell className="text-muted-foreground">
+                        {ticket.category}
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge className={getPriorityClass(ticket.priority)}>
+                          {ticket.priority.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge className={getPriorityClass(ticket.impact)}>
+                          {ticket.impact.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(ticket.status)}>
+                          {ticket.status}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell className="text-muted-foreground">
+                        {formatDate(ticket.created_at)}
+                      </TableCell>
+
+                      <TableCell className="text-muted-foreground">
+                        {getUserNameById(users, ticket.assigned_to_id)}
+                      </TableCell>
+
+                      <TableCell>
+                        <Button asChild variant="ghost" size="sm">
+                            <Link to={`/incidents/${ticket.id}/edit`}>
+                              <Eye className="mr-1 h-4 w-4" />
+                                {canEditTickets ? "Edit" : "View"}
+                            </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </section>
+      </main>
+    </div>  
   );
 }

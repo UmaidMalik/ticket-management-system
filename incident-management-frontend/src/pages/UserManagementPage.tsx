@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { getUsers, updateUserRole } from "@/api/usersApi";
 import { getStoredUser } from "@/lib/auth";
 import type { User } from "@/types";
+import AppHeader from "@/components/AppHeader";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -70,7 +71,9 @@ export default function UserManagementPage() {
 
   if (currentUser?.role !== "admin") {
     return (
-      <main className="min-h-screen bg-muted/40 p-6">
+      <div className="min-h-screen bg-muted/40">
+        <AppHeader/>
+        <main className="min-h-screen bg-muted/40 p-6">
         <div className="mx-auto max-w-3xl">
           <Card>
             <CardHeader>
@@ -86,24 +89,22 @@ export default function UserManagementPage() {
             </CardContent>
           </Card>
         </div>
-      </main>
+        </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-muted/40 p-6">
+    <div className="min-h-screen bg-muted/40">
+      <AppHeader/>
+      <main className="min-h-screen bg-muted/40 p-6">
       <div className="mx-auto max-w-5xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
             <p className="text-muted-foreground">
               Manage user roles for the ticket management system.
             </p>
           </div>
-
-          <Button variant="outline" asChild>
-            <Link to="/account">Back to account</Link>
-          </Button>
         </div>
 
         <Card>
@@ -185,6 +186,7 @@ export default function UserManagementPage() {
           </CardContent>
         </Card>
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

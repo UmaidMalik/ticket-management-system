@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { logout, getStoredUser } from "@/lib/auth";
 import { useEffect, useState } from "react";
+import AppHeader from "@/components/AppHeader";
 
 import {
   AlertCircle,
@@ -91,12 +92,6 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const currentUser = getStoredUser();
-  const canEditTickets = currentUser?.role === "admin" || currentUser?.role === "editor";
-
-  function handleLogout() {
-    logout();
-    navigate("/login");
-  }
 
   useEffect(() => {
     async function loadTickets() {
@@ -145,173 +140,139 @@ export default function Dashboard() {
     .slice(0, 5);
 
   return (
-    <main className="min-h-screen bg-background p-6">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <section className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              SRE Ticket Dashboard
-            </h1>
-            <p className="text-muted-foreground">
-              Track incidents, priorities, assignments, and resolution progress.
-            </p>
+    <div className="min-h-screen bg-muted/40">
+      <AppHeader/>
+      <main className="flex mx-auto max-w-7xl space-y-6 px-6 py-4 sm:px-6 lg:px-4">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6">
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <StatCard
+              title="Total Tickets"
+              value={totalTickets}
+              description="All incidents in the system"
+              icon={TicketIcon}
+            />
+            <StatCard
+              title="Open"
+              value={openTickets}
+              description="Tickets waiting for action"
+              icon={AlertCircle}
+            />
+            <StatCard
+              title="In Progress"
+              value={inProgressTickets}
+              description="Tickets currently being worked"
+              icon={Clock}
+            />
+            <StatCard
+              title="Critical"
+              value={criticalTickets}
+              description="Highest priority incidents"
+              icon={Flame}
+            />
+            <StatCard
+              title="Unassigned"
+              value={unassignedTickets}
+              description="Tickets without an owner"
+              icon={UserX}
+            />
+          </section>
 
-              <div className="flex items-center gap-2">
-              <Link to="/account">
-              {currentUser && (
-                <span className="text-sm text-muted-foreground">
-                  {currentUser.name} ({currentUser.role})
-                </span>
-              )}
-              </Link>
+          <section className="grid gap-4 lg:grid-cols-3">
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Recent Tickets</CardTitle>
+                <CardDescription>
+                  Latest incidents created by users and support staff.
+                </CardDescription>
+              </CardHeader>
 
-              <Button variant="outline" onClick={handleLogout}>
-                Logout
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Button asChild variant="outline">
-              <Link to="/incidents">View Incidents</Link>
-            </Button>
-
-            {canEditTickets && (
-              <Button asChild>
-                <Link to="/incidents/new">Create Incident</Link>
-              </Button>
-            )}
-          </div>
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <StatCard
-            title="Total Tickets"
-            value={totalTickets}
-            description="All incidents in the system"
-            icon={TicketIcon}
-          />
-          <StatCard
-            title="Open"
-            value={openTickets}
-            description="Tickets waiting for action"
-            icon={AlertCircle}
-          />
-          <StatCard
-            title="In Progress"
-            value={inProgressTickets}
-            description="Tickets currently being worked"
-            icon={Clock}
-          />
-          <StatCard
-            title="Critical"
-            value={criticalTickets}
-            description="Highest priority incidents"
-            icon={Flame}
-          />
-          <StatCard
-            title="Unassigned"
-            value={unassignedTickets}
-            description="Tickets without an owner"
-            icon={UserX}
-          />
-        </section>
-
-        <section className="grid gap-4 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Recent Tickets</CardTitle>
-              <CardDescription>
-                Latest incidents created by users and support staff.
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Ticket</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Assigned To</TableHead>
-                    <TableHead>Created</TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {recentTickets.map((ticket) => (
-                    <TableRow key={ticket.id}>
-                      <TableCell
-                        key={ticket.id}
-                        onClick={() => navigate(`/incidents/${ticket.id}/edit`)}
-                        className="cursor-pointer transition-colors hover:bg-muted/50"
-                      >
-                        <div className="font-medium">{ticket.title}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {ticket.category} · Impact: {ticket.impact}
-                        </div>
-                      </TableCell>
-
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(ticket.status)}>
-                          {ticket.status}
-                        </Badge>
-                      </TableCell>
-
-                      <TableCell>
-                        <Badge
-                          variant={getPriorityBadgeVariant(ticket.priority)}
-                        >
-                          {ticket.priority}
-                        </Badge>
-                      </TableCell>
-
-                      <TableCell>
-                        {ticket.assignee_name ?? "Unassigned"}
-                      </TableCell>
-
-                      <TableCell>{formatDate(ticket.created_at)}</TableCell>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Ticket</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Assigned To</TableHead>
+                      <TableHead>Created</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                  </TableHeader>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Resolution Summary</CardTitle>
-              <CardDescription>
-                Closed or resolved tickets compared to active incidents.
-              </CardDescription>
-            </CardHeader>
+                  <TableBody>
+                    {recentTickets.map((ticket) => (
+                      <TableRow key={ticket.id}>
+                        <TableCell
+                          key={ticket.id}
+                          onClick={() => navigate(`/incidents/${ticket.id}/edit`)}
+                          className="cursor-pointer transition-colors hover:bg-muted/50"
+                        >
+                          <div className="font-medium">{ticket.title}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {ticket.category} · Impact: {ticket.impact}
+                          </div>
+                        </TableCell>
 
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg border p-4">
-                <div>
-                  <p className="text-sm font-medium">Resolved / Closed</p>
-                  <p className="text-sm text-muted-foreground">
-                    Completed incidents
+                        <TableCell>
+                          <Badge variant={getStatusBadgeVariant(ticket.status)}>
+                            {ticket.status}
+                          </Badge>
+                        </TableCell>
+
+                        <TableCell>
+                          <Badge
+                            variant={getPriorityBadgeVariant(ticket.priority)}
+                          >
+                            {ticket.priority}
+                          </Badge>
+                        </TableCell>
+
+                        <TableCell>
+                          {ticket.assignee_name ?? "Unassigned"}
+                        </TableCell>
+
+                        <TableCell>{formatDate(ticket.created_at)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Resolution Summary</CardTitle>
+                <CardDescription>
+                  Closed or resolved tickets compared to active incidents.
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div>
+                    <p className="text-sm font-medium">Resolved / Closed</p>
+                    <p className="text-sm text-muted-foreground">
+                      Completed incidents
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-2xl font-semibold">
+                    <CheckCircle2 className="h-5 w-5" />
+                    {resolvedTickets}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm font-medium">Next focus</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Prioritize open critical tickets and assign any unowned
+                    incidents before resolution work continues.
                   </p>
                 </div>
-
-                <div className="flex items-center gap-2 text-2xl font-semibold">
-                  <CheckCircle2 className="h-5 w-5" />
-                  {resolvedTickets}
-                </div>
-              </div>
-
-              <div className="rounded-lg border p-4">
-                <p className="text-sm font-medium">Next focus</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Prioritize open critical tickets and assign any unowned
-                  incidents before resolution work continues.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      </div>
-    </main>
+              </CardContent>
+            </Card>
+          </section>
+        </div>
+      </main>
+    </div>
   );
 }

@@ -30,7 +30,7 @@ swagger_template = {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header",
-            "description": "Enter JWT token as: Bearer <token>",
+            "description": "Paste the full value including the Bearer prefix. Example: Bearer eyJhbGciOiJIUzI1NiIs...",
         }
     },
 }

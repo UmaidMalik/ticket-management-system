@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AppHeader from "@/components/AppHeader";
 
 import {
   changePassword,
@@ -137,178 +138,168 @@ export default function AccountPage() {
   }
 
   return (
-    <main className="min-h-screen bg-muted/40 p-6">
-      <div className="mx-auto max-w-3xl space-y-6">
+    <div className="min-h-screen bg-muted/40">
+      <AppHeader/>
+      <main className="min-h-screen bg-muted/40 p-6">
+    <div className="mx-auto max-w-3xl space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Account</h1>
+          <div className="flex items-center justify-between">
             <p className="text-muted-foreground">
               Manage your profile, password, and account settings.
             </p>
           </div>
-
-        <div className="flex items-center gap-3">
-          {user?.role === "admin" && (
-            <Button variant="outline" asChild>
-              <Link to="/admin/users">User Management</Link>
-            </Button>
-          )}
-
-          <Button variant="outline" asChild>
-            <Link to="/dashboard">Back to dashboard</Link>
-          </Button>
-        </div>
         </div>
 
         <Card>
-          <CardHeader>
+        <CardHeader>
             <CardTitle>Profile</CardTitle>
             <CardDescription>
-              Update your name and email address.
+            Update your name and email address.
             </CardDescription>
-          </CardHeader>
+        </CardHeader>
 
-          <CardContent>
+        <CardContent>
             <form onSubmit={handleProfileSubmit} className="space-y-4">
-              {profileMessage && (
+            {profileMessage && (
                 <div className="rounded-md border border-green-500/40 bg-green-500/10 p-3 text-sm text-green-700">
-                  {profileMessage}
+                {profileMessage}
                 </div>
-              )}
+            )}
 
-              {profileError && (
+            {profileError && (
                 <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-                  {profileError}
+                {profileError}
                 </div>
-              )}
+            )}
 
-              <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full name</Label>
-                  <Input
+                <Label htmlFor="name">Full name</Label>
+                <Input
                     id="name"
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                     required
-                  />
+                />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
+                <Label htmlFor="email">Email</Label>
+                <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     required
-                  />
+                />
                 </div>
-              </div>
+            </div>
 
-              <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Current role:{" "}
-                  <span className="font-medium">{user?.role ?? "Unknown"}</span>
+                Current role:{" "}
+                <span className="font-medium">{user?.role ?? "Unknown"}</span>
                 </p>
 
                 <Button type="submit" disabled={isProfileSubmitting}>
-                  {isProfileSubmitting ? "Saving..." : "Save profile"}
+                {isProfileSubmitting ? "Saving..." : "Save profile"}
                 </Button>
-              </div>
+            </div>
             </form>
-          </CardContent>
+        </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
+        <CardHeader>
             <CardTitle>Password</CardTitle>
             <CardDescription>
-              Change your password using your current password.
+            Change your password using your current password.
             </CardDescription>
-          </CardHeader>
+        </CardHeader>
 
-          <CardContent>
+        <CardContent>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              {passwordMessage && (
+            {passwordMessage && (
                 <div className="rounded-md border border-green-500/40 bg-green-500/10 p-3 text-sm text-green-700">
-                  {passwordMessage}
+                {passwordMessage}
                 </div>
-              )}
+            )}
 
-              {passwordError && (
+            {passwordError && (
                 <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-                  {passwordError}
+                {passwordError}
                 </div>
-              )}
+            )}
 
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current password</Label>
                 <Input
-                  id="currentPassword"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(event) => setCurrentPassword(event.target.value)}
-                  required
+                id="currentPassword"
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                required
                 />
-              </div>
+            </div>
 
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="newPassword">New password</Label>
                 <Input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                  minLength={8}
-                  required
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                minLength={8}
+                required
                 />
                 <p className="text-xs text-muted-foreground">
-                  Password must be at least 8 characters.
+                Password must be at least 8 characters.
                 </p>
-              </div>
+            </div>
 
-              <div className="flex justify-end">
+            <div className="flex justify-end">
                 <Button type="submit" disabled={isPasswordSubmitting}>
-                  {isPasswordSubmitting
+                {isPasswordSubmitting
                     ? "Changing password..."
                     : "Change password"}
                 </Button>
-              </div>
+            </div>
             </form>
-          </CardContent>
+        </CardContent>
         </Card>
 
         <Card className="border-destructive/40">
-          <CardHeader>
+        <CardHeader>
             <CardTitle>Delete account</CardTitle>
             <CardDescription>
-              Delete your account if it is not linked to existing tickets.
+            Delete your account if it is not linked to existing tickets.
             </CardDescription>
-          </CardHeader>
+        </CardHeader>
 
-          <CardContent className="space-y-4">
+        <CardContent className="space-y-4">
             {deleteError && (
-              <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
                 {deleteError}
-              </div>
+            </div>
             )}
 
             <p className="text-sm text-muted-foreground">
-              Accounts linked to existing tickets cannot be deleted because the
-              system preserves incident history.
+            Accounts linked to existing tickets cannot be deleted because the
+            system preserves incident history.
             </p>
 
             <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDeleteAccount}
-              disabled={isDeleting}
+            type="button"
+            variant="destructive"
+            onClick={handleDeleteAccount}
+            disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete account"}
+            {isDeleting ? "Deleting..." : "Delete account"}
             </Button>
-          </CardContent>
+        </CardContent>
         </Card>
-      </div>
-    </main>
+    </div>
+      </main>
+    </div>
   );
 }
