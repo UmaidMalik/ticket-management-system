@@ -103,7 +103,6 @@ export default function EditIncidentPage() {
         priority: ticket.priority,
         incident_reporter_id: ticket.incident_reporter_id,
         assigned_to_id: ticket.assigned_to_id,
-        resolved_at: null,
       });
 
       setTicket(updatedTicket);
