@@ -21,6 +21,8 @@ services:
       MYSQL_DB: ticketing_system
       MYSQL_PORT: 3306
       JWT_SECRET: ${JWT_SECRET}
+      SWAGGER_HOST: ${SWAGGER_HOST}
+      SWAGGER_SCHEME: ${SWAGGER_SCHEME}
     ports:
       - "5000:5000"
     depends_on:
