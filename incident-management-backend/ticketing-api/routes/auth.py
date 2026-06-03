@@ -56,7 +56,7 @@ def register():
               example: test@example.com
             password:
               type: string
-              example: 12345678
+              example: a12345678
     responses:
       201:
         description: User registered successfully
@@ -151,7 +151,7 @@ def login():
               example: mail@example.com
             password:
               type: string
-              example: 12345678
+              example: a12345678
     responses:
       200:
         description: Login successful
