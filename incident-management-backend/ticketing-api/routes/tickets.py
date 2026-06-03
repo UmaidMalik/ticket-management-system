@@ -229,19 +229,83 @@ def update_ticket(ticket_id):
         description: Insufficient permissions
       404:
         description: Ticket not found
+      409:
+        description: Closed tickets must be reopened before editing
     """
     current_user, error_response = require_roles("admin", "editor")
     if error_response:
-        return error_response    
-    data = request.json
+        return error_response
+
+    data = request.get_json(silent=True) or {}
+
+    required_fields = [
+        "title",
+        "description",
+        "category",
+        "impact",
+        "priority",
+        "status",
+        "incident_reporter_id",
+    ]
+
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
     db = get_db()
-    cursor = db.cursor()
+    cursor = db.cursor(dictionary=True)
 
-    resolved_at = None
-    if data.get('status') in ['Resolved', 'Closed']:
+    cursor.execute(
+        """
+        SELECT *
+        FROM tickets
+        WHERE id = %s
+        """,
+        (ticket_id,),
+    )
+
+    existing_ticket = cursor.fetchone()
+
+    if not existing_ticket:
+        cursor.close()
+        return jsonify({"error": "Ticket not found"}), 404
+
+    old_status = existing_ticket["status"]
+    new_status = data["status"]
+
+    if old_status == "Closed":
+        is_reopening = new_status in ["Open", "In Progress"]
+
+        unchanged_fields = (
+            data["title"] == existing_ticket["title"]
+            and data["description"] == existing_ticket["description"]
+            and data["category"] == existing_ticket["category"]
+            and data["impact"] == existing_ticket["impact"]
+            and data["priority"] == existing_ticket["priority"]
+            and int(data["incident_reporter_id"]) == existing_ticket["incident_reporter_id"]
+            and data.get("assigned_to_id") == existing_ticket["assigned_to_id"]
+        )
+
+        if not is_reopening:
+            cursor.close()
+            return jsonify({
+                "error": "Closed tickets must be reopened before editing"
+            }), 409
+
+        if not unchanged_fields:
+            cursor.close()
+            return jsonify({
+                "error": "Only the status can be changed when reopening a closed ticket"
+            }), 409
+
+    resolved_at = existing_ticket["resolved_at"]
+
+    if new_status in ["Resolved", "Closed"] and old_status not in ["Resolved", "Closed"]:
         resolved_at = datetime.utcnow()
+    elif new_status in ["Open", "In Progress"]:
+        resolved_at = None
 
-    query = '''
+    cursor.execute(
+        """
         UPDATE tickets
         SET title = %s,
             description = %s,
@@ -253,23 +317,40 @@ def update_ticket(ticket_id):
             assigned_to_id = %s,
             resolved_at = %s
         WHERE id = %s
-    '''
-    cursor.execute(query, (
-        data['title'],
-        data['description'],
-        data['category'],
-        data['impact'],
-        data['priority'],
-        data['status'],
-        data['incident_reporter_id'],
-        data.get('assigned_to_id'),
-        resolved_at,
-        ticket_id
-    ))
+        """,
+        (
+            data["title"],
+            data["description"],
+            data["category"],
+            data["impact"],
+            data["priority"],
+            new_status,
+            data["incident_reporter_id"],
+            data.get("assigned_to_id"),
+            resolved_at,
+            ticket_id,
+        ),
+    )
+
     db.commit()
+
+    cursor.execute(
+        """
+        SELECT t.*,
+               ur.name as reporter_name,
+               ua.name as assignee_name
+        FROM tickets t
+        LEFT JOIN users ur ON t.incident_reporter_id = ur.id
+        LEFT JOIN users ua ON t.assigned_to_id = ua.id
+        WHERE t.id = %s
+        """,
+        (ticket_id,),
+    )
+
+    updated_ticket = cursor.fetchone()
     cursor.close()
 
-    return jsonify({'message': 'Ticket updated'})
+    return jsonify(updated_ticket), 200
 
 @tickets_bp.route('/tickets/<int:ticket_id>/assign', methods=['PATCH'])
 def assign_ticket(ticket_id):
