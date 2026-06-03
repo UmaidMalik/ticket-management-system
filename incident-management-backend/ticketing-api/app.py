@@ -8,6 +8,9 @@ from routes.auth import auth_bp
 import time
 from flasgger import Swagger
 
+swagger_host = os.getenv("SWAGGER_HOST", "localhost:5000")
+swagger_scheme = os.getenv("SWAGGER_SCHEME", "http")
+
 app = Flask(__name__)
 app.config["JWT_SECRET"] = os.getenv("JWT_SECRET", "dev-secret-change-me")
 CORS(app)
@@ -19,8 +22,9 @@ swagger_template = {
         "description": "API documentation for the Incident Ticket Management System.",
         "version": "1.0.0",
     },
+    "host": swagger_host,
     "basePath": "/",
-    "schemes": ["http", "https"],
+    "schemes": [swagger_scheme],
     "securityDefinitions": {
         "Bearer": {
             "type": "apiKey",
