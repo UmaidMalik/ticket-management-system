@@ -1,5 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
-import { logout, getStoredUser } from "@/lib/auth";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AppHeader from "@/components/AppHeader";
 
@@ -13,7 +12,6 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -91,7 +89,6 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const currentUser = getStoredUser();
 
   useEffect(() => {
     async function loadTickets() {

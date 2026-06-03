@@ -34,7 +34,7 @@ describe("Dashboard", () => {
     expect(screen.getByText(/Loading dashboard/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText("SRE Ticket Dashboard")).toBeInTheDocument();
+      expect(screen.getByText("Incident Management Dashboard")).toBeInTheDocument();
       expect(
         screen.getByText("Production API returning 500 errors")
       ).toBeInTheDocument();
