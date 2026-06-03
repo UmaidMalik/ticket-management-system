@@ -26,8 +26,11 @@ export default function EditIncidentPage() {
   const [error, setError] = useState<string | null>(null);
 
   const currentUser = getStoredUser();
-  const canEditTicket = currentUser?.role === "admin" || currentUser?.role === "editor";
+  const isClosedOrResolved = ticket?.status === "Closed";
+  const canEditTicket = (currentUser?.role === "admin" || currentUser?.role === "editor") && !isClosedOrResolved;
+  const canReopenTicket = (currentUser?.role === "admin" || currentUser?.role === "editor") && isClosedOrResolved;
   const canDeleteTicket = currentUser?.role === "admin";
+
 
   useEffect(() => {
   async function loadData() {
@@ -83,6 +86,33 @@ export default function EditIncidentPage() {
     });
 
     navigate("/incidents");
+  }
+
+  async function handleReopen() {
+    if (!ticket) return;
+
+    setError(null);
+
+    try {
+      const updatedTicket = await updateTicket(ticket.id, {
+        title: ticket.title,
+        description: ticket.description,
+        category: ticket.category,
+        status: "Open",
+        impact: ticket.impact,
+        priority: ticket.priority,
+        incident_reporter_id: ticket.incident_reporter_id,
+        assigned_to_id: ticket.assigned_to_id,
+        resolved_at: null,
+      });
+
+      setTicket(updatedTicket);
+    } catch (error) {
+      console.error(error);
+      setError(
+        error instanceof Error ? error.message : "Could not reopen incident."
+      );
+    }
   }
 
   async function handleDelete() {
@@ -288,31 +318,54 @@ export default function EditIncidentPage() {
                   </div>
                 </div>
 
-                {canEditTicket ? (
-                <div className="flex justify-between gap-3 pt-4">
+
+                <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
                   {canDeleteTicket && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={handleDelete}
-                  >
-                    Delete Incident
-                  </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={handleDelete}
+                        className="w-full sm:w-auto"
+                      >
+                        Delete Incident
+                      </Button>
                   )}
+                {canEditTicket ? (
+                  <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <Button asChild variant="outline" className="w-full sm:w-auto">
+                        <Link to="/incidents">Cancel</Link>
+                      </Button>
 
-                  <div className="flex gap-3">
-                    <Button asChild variant="outline">
-                      <Link to="/incidents">Cancel</Link>
-                    </Button>
-
-                    <Button type="submit">Save Changes</Button>
+                      <Button type="submit" className="w-full sm:w-auto">
+                        Save Changes
+                      </Button>
+                    </div>
                   </div>
-                </div>
                 ) : (
-                  <div className="rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground">
-                    You have viewer access. You can view incident details, but you cannot edit this ticket.
-                  </div>                
+                  <div className="space-y-3 rounded-md border bg-muted/50 p-4 text-sm text-muted-foreground">
+                    {isClosedOrResolved ? (
+                      <>
+                        <p>
+                          This incident is {ticket.status.toLowerCase()} and is read-only.
+                          Reopen it before making changes.
+                        </p>
+
+                        {canReopenTicket && (
+                          <Button type="button" variant="outline" onClick={handleReopen}>
+                            Reopen Incident
+                          </Button>
+                        )}
+                      </>
+                    ) : (
+                      <p>
+                        You have viewer access. You can view incident details, but you cannot
+                        edit this ticket.
+                      </p>
+                    )}
+                  </div>
                 )}
+                </div>
               </form>
             </CardContent>
           </Card>
